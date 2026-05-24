@@ -1,0 +1,413 @@
+{
+  "dataset_name": "Standard Calorie Dataset (raw_exercise + raw_calories)",
+  "generated_at": "2026-03-01T14:43:24.787033",
+  "shape": {
+    "rows": 15000,
+    "columns": 9
+  },
+  "columns": [
+    "User_ID",
+    "Gender",
+    "Age",
+    "Height",
+    "Weight",
+    "Duration",
+    "Heart_Rate",
+    "Body_Temp",
+    "Calories"
+  ],
+  "dtypes": {
+    "User_ID": "int64",
+    "Gender": "object",
+    "Age": "int64",
+    "Height": "float64",
+    "Weight": "float64",
+    "Duration": "float64",
+    "Heart_Rate": "float64",
+    "Body_Temp": "float64",
+    "Calories": "float64"
+  },
+  "memory_usage_mb": 1.69,
+  "null_analysis": {
+    "total_nulls": 0,
+    "columns_with_nulls": 0,
+    "total_columns": 9,
+    "details": {}
+  },
+  "zero_analysis": {
+    "columns_with_zeros": 0,
+    "details": {}
+  },
+  "negative_analysis": {
+    "columns_with_negatives": 0,
+    "details": {}
+  },
+  "duplicate_analysis": {
+    "duplicate_rows": 0,
+    "duplicate_percentage": 0.0,
+    "total_rows": 15000
+  },
+  "statistics": {
+    "User_ID": {
+      "count": 15000,
+      "mean": 14977358.5385,
+      "median": 14997285.0,
+      "std": 2872851.4522,
+      "min": 10001159.0,
+      "max": 19999647.0,
+      "q25": 12474190.75,
+      "q75": 17449278.75,
+      "skewness": 0.0048,
+      "kurtosis": -1.1941,
+      "range": 9998488.0,
+      "iqr": 4975088.0
+    },
+    "Age": {
+      "count": 15000,
+      "mean": 42.7898,
+      "median": 39.0,
+      "std": 16.9803,
+      "min": 20.0,
+      "max": 79.0,
+      "q25": 28.0,
+      "q75": 56.0,
+      "skewness": 0.4734,
+      "kurtosis": -0.9491,
+      "range": 59.0,
+      "iqr": 28.0
+    },
+    "Height": {
+      "count": 15000,
+      "mean": 174.4651,
+      "median": 175.0,
+      "std": 14.2581,
+      "min": 123.0,
+      "max": 222.0,
+      "q25": 164.0,
+      "q75": 185.0,
+      "skewness": -0.0062,
+      "kurtosis": -0.5132,
+      "range": 99.0,
+      "iqr": 21.0
+    },
+    "Weight": {
+      "count": 15000,
+      "mean": 74.9669,
+      "median": 74.0,
+      "std": 15.0357,
+      "min": 36.0,
+      "max": 132.0,
+      "q25": 63.0,
+      "q75": 87.0,
+      "skewness": 0.2267,
+      "kurtosis": -0.6821,
+      "range": 96.0,
+      "iqr": 24.0
+    },
+    "Duration": {
+      "count": 15000,
+      "mean": 15.5306,
+      "median": 16.0,
+      "std": 8.3192,
+      "min": 1.0,
+      "max": 30.0,
+      "q25": 8.0,
+      "q75": 23.0,
+      "skewness": 0.0048,
+      "kurtosis": -1.1848,
+      "range": 29.0,
+      "iqr": 15.0
+    },
+    "Heart_Rate": {
+      "count": 15000,
+      "mean": 95.5185,
+      "median": 96.0,
+      "std": 9.5833,
+      "min": 67.0,
+      "max": 128.0,
+      "q25": 88.0,
+      "q75": 103.0,
+      "skewness": -0.0107,
+      "kurtosis": -0.6442,
+      "range": 61.0,
+      "iqr": 15.0
+    },
+    "Body_Temp": {
+      "count": 15000,
+      "mean": 40.0255,
+      "median": 40.2,
+      "std": 0.7792,
+      "min": 37.1,
+      "max": 41.5,
+      "q25": 39.6,
+      "q75": 40.6,
+      "skewness": -0.9944,
+      "kurtosis": 0.5173,
+      "range": 4.4,
+      "iqr": 1.0
+    },
+    "Calories": {
+      "count": 15000,
+      "mean": 89.5395,
+      "median": 79.0,
+      "std": 62.457,
+      "min": 1.0,
+      "max": 314.0,
+      "q25": 35.0,
+      "q75": 138.0,
+      "skewness": 0.5054,
+      "kurtosis": -0.7178,
+      "range": 313.0,
+      "iqr": 103.0
+    }
+  },
+  "outlier_analysis": {
+    "columns_with_outliers": 5,
+    "details": {
+      "Body_Temp": {
+        "iqr_outlier_count": 369,
+        "iqr_outlier_percentage": 2.46,
+        "zscore_outlier_count": 76,
+        "lower_bound": 38.1,
+        "upper_bound": 42.1,
+        "sample_outlier_rows": [
+          10,
+          24,
+          49,
+          232,
+          301,
+          317,
+          403,
+          442,
+          462,
+          499
+        ]
+      },
+      "Height": {
+        "iqr_outlier_count": 14,
+        "iqr_outlier_percentage": 0.09,
+        "zscore_outlier_count": 7,
+        "lower_bound": 132.5,
+        "upper_bound": 216.5,
+        "sample_outlier_rows": [
+          529,
+          1464,
+          4200,
+          4404,
+          4855,
+          6226,
+          6711,
+          7774,
+          8931,
+          10362
+        ]
+      },
+      "Weight": {
+        "iqr_outlier_count": 6,
+        "iqr_outlier_percentage": 0.04,
+        "zscore_outlier_count": 13,
+        "lower_bound": 27.0,
+        "upper_bound": 123.0,
+        "sample_outlier_rows": [
+          1909,
+          6711,
+          10362,
+          12189,
+          13276,
+          13806
+        ]
+      },
+      "Calories": {
+        "iqr_outlier_count": 4,
+        "iqr_outlier_percentage": 0.03,
+        "zscore_outlier_count": 7,
+        "lower_bound": -119.5,
+        "upper_bound": 292.5,
+        "sample_outlier_rows": [
+          428,
+          3357,
+          6240,
+          13871
+        ]
+      },
+      "Heart_Rate": {
+        "iqr_outlier_count": 1,
+        "iqr_outlier_percentage": 0.01,
+        "zscore_outlier_count": 3,
+        "lower_bound": 65.5,
+        "upper_bound": 125.5,
+        "sample_outlier_rows": [
+          9981
+        ]
+      }
+    }
+  },
+  "correlation_analysis": {
+    "high_correlations": [
+      {
+        "feature_1": "Height",
+        "feature_2": "Weight",
+        "correlation": 0.9585
+      },
+      {
+        "feature_1": "Duration",
+        "feature_2": "Calories",
+        "correlation": 0.9554
+      },
+      {
+        "feature_1": "Duration",
+        "feature_2": "Body_Temp",
+        "correlation": 0.9032
+      },
+      {
+        "feature_1": "Heart_Rate",
+        "feature_2": "Calories",
+        "correlation": 0.8979
+      },
+      {
+        "feature_1": "Duration",
+        "feature_2": "Heart_Rate",
+        "correlation": 0.8529
+      }
+    ],
+    "correlation_matrix": {
+      "Age": {
+        "Age": 1.0,
+        "Height": 0.0096,
+        "Weight": 0.0901,
+        "Duration": 0.0132,
+        "Heart_Rate": 0.0105,
+        "Body_Temp": 0.0132,
+        "Calories": 0.1544
+      },
+      "Height": {
+        "Age": 0.0096,
+        "Height": 1.0,
+        "Weight": 0.9585,
+        "Duration": -0.0046,
+        "Heart_Rate": 0.0005,
+        "Body_Temp": 0.0012,
+        "Calories": 0.0175
+      },
+      "Weight": {
+        "Age": 0.0901,
+        "Height": 0.9585,
+        "Weight": 1.0,
+        "Duration": -0.0019,
+        "Heart_Rate": 0.0043,
+        "Body_Temp": 0.0041,
+        "Calories": 0.0355
+      },
+      "Duration": {
+        "Age": 0.0132,
+        "Height": -0.0046,
+        "Weight": -0.0019,
+        "Duration": 1.0,
+        "Heart_Rate": 0.8529,
+        "Body_Temp": 0.9032,
+        "Calories": 0.9554
+      },
+      "Heart_Rate": {
+        "Age": 0.0105,
+        "Height": 0.0005,
+        "Weight": 0.0043,
+        "Duration": 0.8529,
+        "Heart_Rate": 1.0,
+        "Body_Temp": 0.7715,
+        "Calories": 0.8979
+      },
+      "Body_Temp": {
+        "Age": 0.0132,
+        "Height": 0.0012,
+        "Weight": 0.0041,
+        "Duration": 0.9032,
+        "Heart_Rate": 0.7715,
+        "Body_Temp": 1.0,
+        "Calories": 0.8246
+      },
+      "Calories": {
+        "Age": 0.1544,
+        "Height": 0.0175,
+        "Weight": 0.0355,
+        "Duration": 0.9554,
+        "Heart_Rate": 0.8979,
+        "Body_Temp": 0.8246,
+        "Calories": 1.0
+      }
+    }
+  },
+  "distribution_analysis": {
+    "columns_needing_transformation": [],
+    "details": {
+      "User_ID": {
+        "skewness": 0.0048,
+        "skew_direction": "right",
+        "skew_category": "approximately_normal",
+        "needs_transformation": false,
+        "unique_values": 15000
+      },
+      "Age": {
+        "skewness": 0.4734,
+        "skew_direction": "right",
+        "skew_category": "approximately_normal",
+        "needs_transformation": false,
+        "unique_values": 60
+      },
+      "Height": {
+        "skewness": -0.0062,
+        "skew_direction": "left",
+        "skew_category": "approximately_normal",
+        "needs_transformation": false,
+        "unique_values": 90
+      },
+      "Weight": {
+        "skewness": 0.2267,
+        "skew_direction": "right",
+        "skew_category": "approximately_normal",
+        "needs_transformation": false,
+        "unique_values": 91
+      },
+      "Duration": {
+        "skewness": 0.0048,
+        "skew_direction": "right",
+        "skew_category": "approximately_normal",
+        "needs_transformation": false,
+        "unique_values": 30
+      },
+      "Heart_Rate": {
+        "skewness": -0.0107,
+        "skew_direction": "left",
+        "skew_category": "approximately_normal",
+        "needs_transformation": false,
+        "unique_values": 59
+      },
+      "Body_Temp": {
+        "skewness": -0.9944,
+        "skew_direction": "left",
+        "skew_category": "moderately_skewed",
+        "needs_transformation": false,
+        "unique_values": 45
+      },
+      "Calories": {
+        "skewness": 0.5054,
+        "skew_direction": "right",
+        "skew_category": "moderately_skewed",
+        "needs_transformation": false,
+        "unique_values": 277
+      }
+    }
+  },
+  "target_analysis": {
+    "target_column": "Calories",
+    "count": 15000,
+    "mean": 89.54,
+    "median": 79.0,
+    "std": 62.46,
+    "min": 1.0,
+    "max": 314.0,
+    "skewness": 0.5054,
+    "kurtosis": -0.7178,
+    "zero_count": 0,
+    "negative_count": 0
+  }
+}

@@ -1,0 +1,17 @@
+### Root secrets and local-only files
+.env
+.env.docker
+
+### Frontend 
+admin-frontend/dist/
+admin-frontend/node_modules/
+admin-frontend/.env
+
+user-frontend/dist/
+user-frontend/node_modules/
+user-frontend/.env
+
+### Backend 
+backend/**/__pycache__/
+backend/.env
+backend/venv/
