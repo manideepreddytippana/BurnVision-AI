@@ -56,8 +56,6 @@ services:
     build:
       context: ./user-frontend
       dockerfile: Dockerfile
-      args:
-        VITE_API_BASE_URL: http://localhost:5000
     container_name: burnvision-user-frontend
     restart: unless-stopped
     ports:

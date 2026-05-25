@@ -48,6 +48,10 @@ def create_app():
                 
                 "http://user-frontend:3000", "http://admin-frontend:3001",
             ],
+            "origins_regex": [
+                r"https://.*\.ngrok-free\.app",
+                r"https://.*\.ngrok\.io",
+            ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True

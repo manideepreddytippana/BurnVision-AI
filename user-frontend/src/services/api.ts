@@ -1,6 +1,8 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000') + '/api'
+// Use relative path so all API calls go through nginx reverse proxy.
+// This allows a single ngrok tunnel on port 3000 to serve both frontend + API.
+const API_BASE_URL = '/api'
 
 const api: AxiosInstance = axios.create({
     baseURL: API_BASE_URL,
