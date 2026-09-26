@@ -2,7 +2,7 @@ services:
   # Flask Backend Service
   - type: web
     name: burnvision-backend
-    env: python
+    runtime: python
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 run:app
@@ -20,23 +20,25 @@ services:
       - key: SARVAM_AI_API_KEY
         sync: false
 
-  # User Frontend
-  - type: static
+  # User Frontend (Static Site)
+  - type: web
     name: burnvision-user-frontend
+    runtime: static
     rootDir: user-frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
         destination: /index.html
 
-  # Admin Frontend
-  - type: static
+  # Admin Frontend (Static Site)
+  - type: web
     name: burnvision-admin-frontend
+    runtime: static
     rootDir: admin-frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
+    staticPublishPath: ./dist
     routes:
       - type: rewrite
         source: /*
