@@ -1,5 +1,5 @@
 services:
-  # Flask Backend Service
+  # Flask Backend Service (Compute instance - Free tier)
   - type: web
     name: burnvision-backend
     runtime: python
@@ -21,11 +21,10 @@ services:
       - key: SARVAM_AI_API_KEY
         sync: false
 
-  # User Frontend (Static Site)
+  # User Frontend (Static Site - Render static sites are permanently free, no plan field needed)
   - type: web
     name: burnvision-user-frontend
     runtime: static
-    plan: free
     rootDir: user-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
@@ -34,11 +33,10 @@ services:
         source: /*
         destination: /index.html
 
-  # Admin Frontend (Static Site)
+  # Admin Frontend (Static Site - Render static sites are permanently free, no plan field needed)
   - type: web
     name: burnvision-admin-frontend
     runtime: static
-    plan: free
     rootDir: admin-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
