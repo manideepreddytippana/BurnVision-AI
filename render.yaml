@@ -3,6 +3,7 @@ services:
   - type: web
     name: burnvision-backend
     runtime: python
+    plan: free
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 run:app
@@ -24,6 +25,7 @@ services:
   - type: web
     name: burnvision-user-frontend
     runtime: static
+    plan: free
     rootDir: user-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
@@ -36,6 +38,7 @@ services:
   - type: web
     name: burnvision-admin-frontend
     runtime: static
+    plan: free
     rootDir: admin-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: ./dist
