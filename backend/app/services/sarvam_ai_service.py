@@ -10,7 +10,7 @@ class SarvamAIService:
     """Proxy service for Sarvam AI evaluation calls."""
 
     ENDPOINT = "https://api.sarvam.ai/v1/chat/completions"
-    DEFAULT_MODEL = "sarvam-m"
+    DEFAULT_MODEL = "sarvam-105b"
 
     def __init__(self):
         self.api_key = os.getenv("SARVAM_AI_API_KEY") or os.getenv("SARVAM_API_KEY")
