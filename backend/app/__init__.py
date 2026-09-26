@@ -39,24 +39,32 @@ def create_app():
     jwt.init_app(app)
     
     
+    allowed_origins = [
+        "http://localhost:3000", "http://localhost:3001",
+        "http://localhost:3002", "http://localhost:3003",
+        "http://localhost:5000",
+        "http://user-frontend:3000", "http://admin-frontend:3001",
+    ]
+    custom_origins = os.getenv("CORS_ALLOWED_ORIGINS", "")
+    if custom_origins:
+        allowed_origins.extend([origin.strip() for origin in custom_origins.split(",") if origin.strip()])
+
     CORS(app, resources={
         r"/api/*": {
-            "origins": [
-                "http://localhost:3000", "http://localhost:3001",
-                "http://localhost:3002", "http://localhost:3003",
-                "http://localhost:5000",
-                
-                "http://user-frontend:3000", "http://admin-frontend:3001",
-            ],
+            "origins": allowed_origins,
             "origins_regex": [
                 r"https://.*\.ngrok-free\.app",
                 r"https://.*\.ngrok\.io",
+                r"https://.*\.vercel\.app",
+                r"https://.*\.onrender\.com",
+                r"https://.*\.railway\.app",
             ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
         }
     })
+
     
     
     @jwt.invalid_token_loader

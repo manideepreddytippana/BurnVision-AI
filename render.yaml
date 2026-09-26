@@ -1,0 +1,43 @@
+services:
+  # Flask Backend Service
+  - type: web
+    name: burnvision-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 120 run:app
+    envVars:
+      - key: FLASK_APP
+        value: run.py
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: SARVAM_AI_API_KEY
+        sync: false
+
+  # User Frontend
+  - type: static
+    name: burnvision-user-frontend
+    rootDir: user-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+  # Admin Frontend
+  - type: static
+    name: burnvision-admin-frontend
+    rootDir: admin-frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
