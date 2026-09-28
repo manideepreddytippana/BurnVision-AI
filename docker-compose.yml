@@ -1,6 +1,5 @@
 services:
 
-  
   db:
     image: mysql:8.0
     container_name: burnvision-db
@@ -38,11 +37,11 @@ services:
       JWT_ACCESS_TOKEN_EXPIRES: ${JWT_ACCESS_TOKEN_EXPIRES:-3600}
       JWT_REFRESH_TOKEN_EXPIRES: ${JWT_REFRESH_TOKEN_EXPIRES:-2592000}
       
-      SARVAM_AI_API_KEY: ${SARVAM_AI_API_KEY:-}
+      SARVAM_API_KEY: ${SARVAM_API_KEY:-}
       SARVAM_AI_MODEL: ${SARVAM_AI_MODEL:-sarvam-m}
       SARVAM_AI_TIMEOUT: ${SARVAM_AI_TIMEOUT:-25}
       
-      FLASK_APP: run.py
+      FLASK_APP: main.py
       FLASK_ENV: production
       FLASK_DEBUG: "0"
     depends_on:
