@@ -20,7 +20,7 @@ import {
     ResponsiveContainer
 } from 'recharts'
 
-const API_URL = '/api'
+import api from '../services/api'
 
 interface ModelComparisonData {
     models: {
@@ -53,11 +53,8 @@ export default function ModelMetrics(): JSX.Element {
 
     const fetchModelComparison = async () => {
         try {
-            const response = await fetch(`${API_URL}/calorie-predict/models/comparison`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            const data = await response.json()
-            setModelComparison(data)
+            const response = await api.get('/calorie-predict/models/comparison')
+            setModelComparison(response.data)
         } catch (err) {
             console.error('Failed to fetch model comparison:', err)
         } finally {

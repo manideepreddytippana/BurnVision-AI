@@ -32,7 +32,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
-const API_URL = '/api'
+import api from '../services/api'
 
 interface DerivedMetrics {
     bmi: number
@@ -116,22 +116,20 @@ export default function AllPredictions(): JSX.Element {
         setIsLoading(true)
         try {
             // Fetch basic predictions
-            const basicRes = await fetch(
-                `${API_URL}/calorie-predict/history?page=${currentPage}&per_page=10`,
-                { headers: { 'Authorization': `Bearer ${token}` } }
+            const basicRes = await api.get(
+                `/calorie-predict/history?page=${currentPage}&per_page=10`
             )
-            const basicData = await basicRes.json()
+            const basicData = basicRes.data
             const basicPredictions = (basicData.predictions || []).map((p: any) => ({
                 ...p,
                 prediction_type: 'basic'
             }))
 
             // Fetch advanced predictions
-            const advRes = await fetch(
-                `${API_URL}/advanced-calorie-predict/history?page=${currentPage}&per_page=10`,
-                { headers: { 'Authorization': `Bearer ${token}` } }
+            const advRes = await api.get(
+                `/advanced-calorie-predict/history?page=${currentPage}&per_page=10`
             )
-            const advData = await advRes.json()
+            const advData = advRes.data
             const advPredictions = (advData.predictions || []).map((p: any) => ({
                 ...p,
                 prediction_type: 'advanced'
