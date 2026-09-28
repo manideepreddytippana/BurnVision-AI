@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 from datetime import timedelta
 import os
@@ -10,37 +11,40 @@ from dotenv import load_dotenv
 load_dotenv()
 
 db = SQLAlchemy()
+migrate = Migrate()
 
 jwt = JWTManager()
 
 def create_app():
     app = Flask(__name__)
-    
-    
-    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key')
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
-        'DATABASE_URL', 
-        'mysql+pymysql://root:root@localhost:3306/calorie_ai'
-    )
+
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'jwt-secret-key')
+    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(
-        seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', 3600))
+        seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES'))
     )
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(
-        seconds=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', 2592000))
+        seconds=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES'))
     )
-    
+    app.config['SARVAM_API_KEY'] = os.getenv('SARVAM_API_KEY')
+    app.config['SARVAM_AI_MODEL'] = os.getenv('SARVAM_AI_MODEL')
+    app.config['SARVAM_AI_TIMEOUT'] = int(os.getenv('SARVAM_AI_TIMEOUT'))
+
+    if not app.config.get('SECRET_KEY'):
+        raise ValueError("No SECRET_KEY set for Flask application")
+    if not app.config.get('JWT_SECRET_KEY'):
+        raise ValueError("No JWT_SECRET_KEY set for Flask application")
+
     
     db.init_app(app)
+    migrate.init_app(app, db)
 
     jwt.init_app(app)
     
-    
-    import re
-    
+        
     allowed_origins = [
         "http://localhost:3000", "http://localhost:3001",
         "http://localhost:3002", "http://localhost:3003",
@@ -104,12 +108,6 @@ def create_app():
     app.register_blueprint(calorie_predict_bp, url_prefix='/api/calorie-predict')
     app.register_blueprint(advanced_calorie_predict_bp, url_prefix='/api/advanced-calorie-predict')
     app.register_blueprint(ai_bp, url_prefix='/api/ai')
-    
-    
-    
-    with app.app_context():
-        db.create_all()
-    
     @app.route('/api/health')
     def health_check():
         return {'status': 'healthy', 'version': '1.0.0'}

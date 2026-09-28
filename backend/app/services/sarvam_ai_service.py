@@ -13,9 +13,10 @@ class SarvamAIService:
     DEFAULT_MODEL = "sarvam-105b"
 
     def __init__(self):
-        self.api_key = os.getenv("SARVAM_AI_API_KEY") or os.getenv("SARVAM_API_KEY")
-        self.model = os.getenv("SARVAM_AI_MODEL", self.DEFAULT_MODEL)
-        self.timeout = int(os.getenv("SARVAM_AI_TIMEOUT", "25"))
+        from flask import current_app
+        self.api_key = current_app.config["SARVAM_API_KEY"]
+        self.model = current_app.config["SARVAM_AI_MODEL"]
+        self.timeout = current_app.config["SARVAM_AI_TIMEOUT"]
 
     @staticmethod
     def _empty_structured() -> Dict[str, Any]:
@@ -154,10 +155,5 @@ class SarvamAIService:
                 "raw_text": "",
                 "structured": self._empty_structured(),
             }
-
-
-sarvam_ai_service = SarvamAIService()
-
-
 def get_sarvam_ai_service() -> SarvamAIService:
-    return sarvam_ai_service
+    return SarvamAIService()
