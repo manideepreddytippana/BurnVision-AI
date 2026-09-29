@@ -26,7 +26,7 @@
   - [2. Dual-Tier Calorie Prediction ML Engine](#2-dual-tier-calorie-prediction-ml-engine)
   - [3. Explainable AI (XAI) & SHAP Attributions](#3-explainable-ai-xai--shap-attributions)
   - [4. Generative AI Coaching (Sarvam AI)](#4-generative-ai-coaching-sarvam-ai)
-  - [5. Enterprise Security Hardening](#5-enterprise-security-hardening)
+
 - [Database Schema & Models](#database-schema--models)
 - [API Reference](#api-reference)
 - [Access Points](#access-points)
@@ -69,7 +69,7 @@ BurnVision AI is architected as an enterprise-grade monorepo containing:
 ### For Administrators
 - 📊 **Executive Overview Dashboard**: High-level platform health indicators, total user counts, active rooms, weekly activity charts, and fitness level distributions.
 - 👥 **User Directory & Account Controls**: In-depth inspection of user profiles, workout histories, and prediction logs, with the ability to edit roles or instantly clear security lockouts.
-- 🚪 **Group & Room Management**: Create and configure virtual workout rooms with participant limits, duration caps, and min/max calorie burn goals.
+- 🚪 **Group & Room Management(not implemented)**: Create and configure virtual workout rooms with participant limits, duration caps, and min/max calorie burn goals.
 - 🚨 **System Alerts & Notifications**: Centralized feed of critical platform events with the capability to notify user owners or dismiss resolved alerts.
 - ⚙️ **Operational Settings**: System-level configuration controls and service status monitoring.
 

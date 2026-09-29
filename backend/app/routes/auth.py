@@ -25,7 +25,7 @@ def register(validated_data):
     )
     if not password_validation.is_valid:
         return jsonify({
-            'message': 'Password does not meet complexity requirements.',
+            'message': 'Password must contain at least one lowercase, uppercase, number, and special character.',
             'errors': password_validation.errors
         }), 422
     
