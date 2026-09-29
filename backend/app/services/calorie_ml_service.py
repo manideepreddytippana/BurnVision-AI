@@ -1,9 +1,3 @@
-"""
-Calorie ML Service - Hybrid Training Approach
-Provides ML-based calorie burn prediction using multiple models.
-Pre-trains default models and allows on-demand training with custom splits.
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -16,7 +10,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error, explained_variance_score
 from typing import Dict, Any, Optional, Tuple
 from app.services.data_preprocessor import DataPreprocessor
-
 
 try:
     import xgboost as xgb
@@ -32,15 +25,7 @@ except ImportError:
     LIGHTGBM_AVAILABLE = False
     print("Warning: LightGBM not available")
 
-
 class CalorieMLService:
-    """
-    ML Service for calorie burn prediction with hybrid training approach.
-    - Pre-trains default models with 80% split
-    - Allows on-demand training with custom splits
-    - Supports multiple ML models: Linear Regression, Random Forest, XGBoost, LightGBM
-    - Provides ensemble predictions
-    """
     
     DEFAULT_TRAIN_SPLIT = 0.8
     MODELS_DIR = Path(__file__).parent.parent / 'models' / 'trained'
@@ -64,20 +49,16 @@ class CalorieMLService:
         self._load_or_train_default_models()
     
     def _ensure_models_dir(self):
-        """Create models directory if it doesn't exist"""
         self.MODELS_DIR.mkdir(parents=True, exist_ok=True)
     
     def _load_dataset(self) -> pd.DataFrame:
-        """Load and merge the calorie dataset"""
         exercise_path = self.DATASET_DIR / 'raw_exercise.csv'
         calories_path = self.DATASET_DIR / 'raw_calories.csv'
         
         exercise_df = pd.read_csv(exercise_path)
         calories_df = pd.read_csv(calories_path)
         
-        
         df = pd.merge(exercise_df, calories_df, on='User_ID')
-        
         
         df['Gender_Encoded'] = self.label_encoder.fit_transform(df['Gender'])
         
@@ -87,18 +68,15 @@ class CalorieMLService:
     FEATURE_COLS = ['Gender_Encoded', 'Age', 'Height', 'Weight', 'Duration', 'Heart_Rate', 'Body_Temp']
     
     def _prepare_features(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
-        """Prepare feature matrix and target vector"""
         X = df[self.FEATURE_COLS].values
         y = df['Calories'].values
         return X, y
     
     def _get_model_path(self, model_type: str, train_split: float) -> Path:
-        """Get path for saving/loading a model"""
         split_str = str(int(train_split * 100))
         return self.MODELS_DIR / f'{model_type}_{split_str}.pkl'
     
     def _train_model(self, model_type: str, X_train: np.ndarray, y_train: np.ndarray) -> Any:
-        """Train a specific model type"""
         if model_type == 'linear_regression':
             model = LinearRegression()
         elif model_type == 'random_forest':
@@ -118,9 +96,7 @@ class CalorieMLService:
         return model
     
     def _load_or_train_default_models(self):
-        """Load pre-trained models or train them if not available"""
         df = self._load_dataset()
-        
         
         preprocessor_path = self.MODELS_DIR / 'preprocessor_standard.pkl'
         X, y = self.preprocessor.preprocess_training_data(
@@ -152,20 +128,17 @@ class CalorieMLService:
                 joblib.dump(model, model_path)
                 self.models[model_type] = model
                 print(f"Saved {model_type} model to {model_path}")
-            
-            
+                       
             y_pred = self.models[model_type].predict(X_test)
             mae = mean_absolute_error(y_test, y_pred)
             mse = mean_squared_error(y_test, y_pred)
             rmse = np.sqrt(mse)
             r2 = r2_score(y_test, y_pred)
             explained_var = explained_variance_score(y_test, y_pred)
-            
-            
+                       
             tolerance = 0.05  
             within_tolerance = np.abs(y_pred - y_test) <= (np.abs(y_test) * tolerance)
-            accuracy_pct = np.mean(within_tolerance) * 100
-            
+            accuracy_pct = np.mean(within_tolerance) * 100           
             
             errors = y_pred - y_test
             if np.std(errors) > 0:
@@ -187,19 +160,16 @@ class CalorieMLService:
                 'error_std': round(float(np.std(errors)), 2)
             }
         
-        
         encoder_path = self.MODELS_DIR / 'label_encoder.pkl'
         joblib.dump(self.label_encoder, encoder_path)
         
         self.is_initialized = True
     
     def train_custom_model(self, model_type: str, train_split: float) -> Dict[str, Any]:
-        """Train a model with custom train split"""
         if model_type == 'ensemble':
             raise ValueError("Cannot train ensemble directly, train individual models")
         
         df = self._load_dataset()
-        
         
         X, y = self.preprocessor.preprocess_training_data(
             df, self.FEATURE_COLS, 'Calories'
@@ -208,17 +178,13 @@ class CalorieMLService:
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, train_size=train_split, random_state=42
         )
-        
-        
+         
         model = self._train_model(model_type, X_train, y_train)
-        
-        
+         
         model_path = self._get_model_path(model_type, train_split)
         joblib.dump(model, model_path)
         
-        
         self.models[model_type] = model
-        
         
         y_pred = model.predict(X_test)
         mae = mean_absolute_error(y_test, y_pred)
@@ -227,11 +193,9 @@ class CalorieMLService:
         r2 = r2_score(y_test, y_pred)
         explained_var = explained_variance_score(y_test, y_pred)
         
-        
         tolerance = 0.05
         within_tolerance = np.abs(y_pred - y_test) <= (np.abs(y_test) * tolerance)
         accuracy_pct = np.mean(within_tolerance) * 100
-        
         
         errors = y_pred - y_test
         if np.std(errors) > 0:
@@ -262,7 +226,6 @@ class CalorieMLService:
         }
     
     def _convert_to_native_types(self, obj: Any) -> Any:
-        """Recursively convert numpy types to native Python types for JSON serialization"""
         if isinstance(obj, dict):
             return {key: self._convert_to_native_types(value) for key, value in obj.items()}
         elif isinstance(obj, list):
@@ -278,16 +241,6 @@ class CalorieMLService:
         return obj
     
     def predict(self, features: Dict[str, Any], model_type: str = 'ensemble') -> Dict[str, Any]:
-        """
-        Make calorie prediction with derived metrics
-        
-        Args:
-            features: Dict with gender, age, height, weight, duration, heart_rate, body_temp
-            model_type: Model to use for prediction
-        
-        Returns:
-            Dict with prediction results and all derived metrics
-        """
         
         gender = features.get('gender', 'male').lower()
         gender_encoded = 0 if gender == 'female' else 1
@@ -299,15 +252,12 @@ class CalorieMLService:
         heart_rate = features.get('heart_rate', 100)
         body_temp = features.get('body_temp', 38.5)
         
-        
         X = pd.DataFrame(
             [[gender_encoded, age, height, weight, duration, heart_rate, body_temp]],
             columns=self.FEATURE_COLS
         )
         
-        
         X_scaled = self.preprocessor.preprocess_prediction_input(X.values)
-        
         
         if model_type == 'ensemble':
             predictions = []
@@ -319,7 +269,6 @@ class CalorieMLService:
                 model_weight = max(self.model_metrics.get(name, {}).get('r2_score', 0.5), 0.1)
                 model_weights.append(model_weight)
             
-            
             total_weight = sum(model_weights)
             predicted_calories = sum(p * w for p, w in zip(predictions, model_weights)) / total_weight
             confidence = sum(model_weights) / len(model_weights)
@@ -329,14 +278,11 @@ class CalorieMLService:
             predicted_calories = float(self.models[model_type].predict(X_scaled)[0])  
             confidence = self.model_metrics.get(model_type, {}).get('r2_score', 0.8)
         
-        
         derived_metrics = self._calculate_derived_metrics(
             gender, age, height, weight, duration, heart_rate, body_temp, predicted_calories
         )
         
-        
         derived_metrics = self._convert_to_native_types(derived_metrics)
-        
         
         if model_type == 'ensemble':
             
@@ -363,9 +309,7 @@ class CalorieMLService:
     def _calculate_derived_metrics(
         self, gender: str, age: int, height: float, weight: float,
         duration: float, heart_rate: float, body_temp: float, calories: float
-    ) -> Dict[str, Any]:
-        """Calculate all derived metrics from input data"""
-        
+    ) -> Dict[str, Any]:        
         
         height_m = height / 100
         bmi = round(weight / (height_m ** 2), 1)
@@ -379,10 +323,8 @@ class CalorieMLService:
         else:
             bmi_category = 'Obese'
         
-        
         max_hr = 220 - age
         hr_percent = round((heart_rate / max_hr) * 100, 1)
-        
         
         if hr_percent < 50:
             hr_zone = {'zone': 1, 'label': 'Very Light', 'range': '50-60%'}
@@ -397,7 +339,6 @@ class CalorieMLService:
         else:
             hr_zone = {'zone': 5, 'label': 'Max Effort', 'range': '90-100%'}
         
-        
         if hr_percent < 60:
             intensity_level = 'Low'
         elif hr_percent <= 75:
@@ -406,7 +347,6 @@ class CalorieMLService:
             intensity_level = 'High'
         
         effort_score = round(heart_rate * duration, 0)
-        
         
         if body_temp < 38:
             temp_category = 'Normal'
@@ -417,11 +357,9 @@ class CalorieMLService:
         
         heat_stress_flag = body_temp > 39
         
-        
         hr_per_min = round(heart_rate / duration, 2) if duration > 0 else 0
         calories_per_min = round(calories / duration, 2) if duration > 0 else 0
         workout_load = round(duration * (hr_percent / 100), 1)
-        
         
         if age < 20:
             age_group = 'Teen'
@@ -439,8 +377,6 @@ class CalorieMLService:
         else:
             height_category = 'Tall'
         
-        
-        
         if duration > 20 and hr_percent < 70:
             fitness_level = 'Advanced'
         elif duration > 15 and hr_percent < 80:
@@ -448,9 +384,7 @@ class CalorieMLService:
         else:
             fitness_level = 'Beginner'
         
-        
         risk_flag = hr_percent > 85 and body_temp > 39
-        
         
         if duration < 15 and intensity_level == 'High':
             workout_type = 'HIIT'
@@ -464,40 +398,31 @@ class CalorieMLService:
             workout_type = 'General Exercise'
         
         return {
-            
             'bmi': bmi,
             'bmi_category': bmi_category,
             
-            
             'max_heart_rate': max_hr,
             'hr_percentage': hr_percent,
-            'hr_zone': hr_zone,
-            
-            
+            'hr_zone': hr_zone,            
             'intensity_level': intensity_level,
             'effort_score': effort_score,
             
-            
             'temp_category': temp_category,
-            'heat_stress_flag': heat_stress_flag,
-            
+            'heat_stress_flag': heat_stress_flag,           
             
             'hr_per_minute': hr_per_min,
             'calories_per_minute': calories_per_min,
             'workout_load': workout_load,
             
-            
             'age_group': age_group,
-            'height_category': height_category,
-            
-            
+            'height_category': height_category, 
+
             'fitness_level': fitness_level,
             'risk_flag': risk_flag,
             'workout_type_predicted': workout_type
         }
     
     def get_available_models(self) -> Dict[str, Any]:
-        """Get information about available models"""
         available = {}
         for model_type, display_name in self.MODEL_TYPES.items():
             if model_type == 'ensemble':
@@ -529,7 +454,6 @@ class CalorieMLService:
         }
     
     def get_model_comparison(self) -> Dict[str, Any]:
-        """Get comprehensive model comparison data for graphs"""
         comparison_data = {
             'models': [],
             'metrics': {
@@ -581,10 +505,6 @@ class CalorieMLService:
         return self._convert_to_native_types(comparison_data)
     
     def cleanup_custom_models(self) -> Dict[str, Any]:
-        """
-        Delete all model files that were trained with splits other than 80%.
-        This keeps only the default models and cleans up custom training experiments.
-        """
         deleted_files = []
         kept_files = []
         
@@ -596,7 +516,6 @@ class CalorieMLService:
             if filename == 'label_encoder':
                 kept_files.append(str(model_file.name))
                 continue
-            
             
             parts = filename.rsplit('_', 1)
             if len(parts) == 2:
@@ -613,7 +532,6 @@ class CalorieMLService:
             else:
                 kept_files.append(str(model_file.name))
         
-        
         self.models.clear()
         self.model_metrics.clear()
         self._load_or_train_default_models()
@@ -625,12 +543,9 @@ class CalorieMLService:
             'message': f'Cleaned up {len(deleted_files)} custom model(s), kept {len(kept_files)} default model(s)'
         }
 
-
-
 _ml_service: Optional[CalorieMLService] = None
 
 def get_ml_service() -> CalorieMLService:
-    """Get or create the ML service singleton"""
     global _ml_service
     if _ml_service is None:
         _ml_service = CalorieMLService()

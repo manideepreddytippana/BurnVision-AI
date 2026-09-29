@@ -2,11 +2,6 @@ import numpy as np
 from typing import Dict, Any, List
 
 class MotionAnalysisService:
-    """
-    Service for analyzing pose landmarks and calculating motion metrics.
-    Works with MediaPipe pose data from the frontend.
-    """
-    
     
     LANDMARKS = {
         'nose': 0,
@@ -23,7 +18,6 @@ class MotionAnalysisService:
         'left_ankle': 27,
         'right_ankle': 28
     }
-    
     
     EXERCISE_PATTERNS = {
         'squat': {
@@ -45,15 +39,6 @@ class MotionAnalysisService:
         self.frame_count = 0
     
     def analyze_pose(self, landmarks: List[Dict]) -> Dict[str, Any]:
-        """
-        Analyze pose landmarks and extract metrics.
-        
-        Args:
-            landmarks: List of {x, y, z, visibility} for each landmark
-            
-        Returns:
-            Analysis results including joint angles, velocity, form score
-        """
         if not landmarks or len(landmarks) < 33:
             return {
                 'joint_angles': {},
@@ -65,15 +50,11 @@ class MotionAnalysisService:
         
         joint_angles = self._calculate_joint_angles(landmarks)
         
-        
         velocity = self._calculate_velocity(landmarks)
-        
         
         form_score = self._assess_form_quality(landmarks, joint_angles)
         
-        
         detected_exercise = self._detect_exercise(joint_angles)
-        
         
         self.previous_landmarks = landmarks
         self.frame_count += 1
@@ -86,16 +67,13 @@ class MotionAnalysisService:
         }
     
     def _calculate_joint_angles(self, landmarks: List[Dict]) -> Dict[str, float]:
-        """Calculate angles for major joints"""
         angles = {}
-        
-        
+    
         angles['left_elbow'] = self._calculate_angle(
             landmarks[self.LANDMARKS['left_shoulder']],
             landmarks[self.LANDMARKS['left_elbow']],
             landmarks[self.LANDMARKS['left_wrist']]
         )
-        
         
         angles['right_elbow'] = self._calculate_angle(
             landmarks[self.LANDMARKS['right_shoulder']],
@@ -103,20 +81,17 @@ class MotionAnalysisService:
             landmarks[self.LANDMARKS['right_wrist']]
         )
         
-        
         angles['left_knee'] = self._calculate_angle(
             landmarks[self.LANDMARKS['left_hip']],
             landmarks[self.LANDMARKS['left_knee']],
             landmarks[self.LANDMARKS['left_ankle']]
         )
         
-        
         angles['right_knee'] = self._calculate_angle(
             landmarks[self.LANDMARKS['right_hip']],
             landmarks[self.LANDMARKS['right_knee']],
             landmarks[self.LANDMARKS['right_ankle']]
         )
-        
         
         angles['left_hip'] = self._calculate_angle(
             landmarks[self.LANDMARKS['left_shoulder']],
@@ -133,7 +108,6 @@ class MotionAnalysisService:
         return angles
     
     def _calculate_angle(self, point1: Dict, point2: Dict, point3: Dict) -> float:
-        """Calculate angle between three points (in degrees)"""
         try:
             a = np.array([point1['x'], point1['y']])
             b = np.array([point2['x'], point2['y']])
@@ -150,7 +124,6 @@ class MotionAnalysisService:
             return 0.0
     
     def _calculate_velocity(self, landmarks: List[Dict]) -> float:
-        """Calculate movement velocity between frames"""
         if self.previous_landmarks is None:
             return 0.0
         
@@ -171,14 +144,11 @@ class MotionAnalysisService:
         return round(total_distance / len(key_points), 4)
     
     def _assess_form_quality(self, landmarks: List[Dict], angles: Dict[str, float]) -> float:
-        """Assess overall form quality (0-100)"""
         score = 100.0
-        
         
         elbow_diff = abs(angles.get('left_elbow', 90) - angles.get('right_elbow', 90))
         knee_diff = abs(angles.get('left_knee', 180) - angles.get('right_knee', 180))
         hip_diff = abs(angles.get('left_hip', 180) - angles.get('right_hip', 180))
-        
         
         if elbow_diff > 15:
             score -= min(elbow_diff - 15, 15)
@@ -186,7 +156,6 @@ class MotionAnalysisService:
             score -= min(knee_diff - 10, 15)
         if hip_diff > 10:
             score -= min(hip_diff - 10, 10)
-        
         
         left_shoulder = landmarks[self.LANDMARKS['left_shoulder']]
         right_shoulder = landmarks[self.LANDMARKS['right_shoulder']]
@@ -198,19 +167,15 @@ class MotionAnalysisService:
         return round(max(0, min(100, score)), 1)
     
     def _detect_exercise(self, angles: Dict[str, float]) -> str:
-        """Detect current exercise based on joint angles"""
         knee_avg = (angles.get('left_knee', 180) + angles.get('right_knee', 180)) / 2
         elbow_avg = (angles.get('left_elbow', 180) + angles.get('right_elbow', 180)) / 2
         hip_avg = (angles.get('left_hip', 180) + angles.get('right_hip', 180)) / 2
         
-        
         if 70 < knee_avg < 130 and hip_avg < 140:
             return 'squat'
         
-        
         if 70 < elbow_avg < 170:
             return 'pushup'
-        
         
         if abs(angles.get('left_knee', 180) - angles.get('right_knee', 180)) > 40:
             return 'lunge'
@@ -218,7 +183,6 @@ class MotionAnalysisService:
         return 'general'
     
     def get_form_feedback(self, landmarks: List[Dict], exercise_type: str) -> Dict[str, Any]:
-        """Generate real-time form feedback"""
         analysis = self.analyze_pose(landmarks)
         angles = analysis['joint_angles']
         
@@ -258,7 +222,6 @@ class MotionAnalysisService:
         }
     
     def calculate_calories(self, motion_sequence: List[Dict], weight: float, duration: float) -> Dict[str, Any]:
-        """Calculate calories from motion sequence"""
         if not motion_sequence:
             return {'calories': 0, 'met_value': 1.0, 'intensity': 'low', 'breakdown': {}}
         

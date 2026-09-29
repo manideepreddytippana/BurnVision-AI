@@ -2,10 +2,6 @@ import numpy as np
 from typing import Dict, Any, List
 
 class XAIService:
-    """
-    Explainable AI service for generating SHAP values and human-readable explanations.
-    """
-    
     
     FEATURE_WEIGHTS = {
         'heart_rate': 0.25,
@@ -23,12 +19,6 @@ class XAIService:
         self.explainer = None  
     
     def calculate_shap_values(self, features: Dict[str, Any], prediction: float) -> Dict[str, float]:
-        """
-        Calculate SHAP values for each feature.
-        
-        In production, this would use actual SHAP library with a trained model.
-        This is a simplified simulation based on feature weights.
-        """
         shap_values = {}
         base_value = prediction * 0.3  
         remaining = prediction - base_value
@@ -63,7 +53,6 @@ class XAIService:
         return shap_values
     
     def get_feature_importance(self, shap_values: Dict[str, float]) -> List[Dict[str, Any]]:
-        """Get sorted feature importance from SHAP values"""
         importance = []
         for feature, value in shap_values.items():
             importance.append({
@@ -78,9 +67,6 @@ class XAIService:
         return importance
     
     def generate_explanation(self, features: Dict[str, Any], prediction: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Generate human-readable explanation for the prediction.
-        """
         calories = prediction.get('calories', 0)
         confidence = prediction.get('confidence', 0.8)
         
@@ -133,7 +119,6 @@ class XAIService:
         }
     
     def _format_feature_name(self, feature: str) -> str:
-        """Convert feature key to readable name"""
         name_map = {
             'heart_rate': 'Heart Rate',
             'duration': 'Workout Duration',

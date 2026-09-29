@@ -5,9 +5,7 @@ from typing import Any, Dict, List
 
 import requests
 
-
 class SarvamAIService:
-    """Proxy service for Sarvam AI evaluation calls."""
 
     ENDPOINT = "https://api.sarvam.ai/v1/chat/completions"
     DEFAULT_MODEL = "sarvam-105b"
@@ -151,7 +149,7 @@ class SarvamAIService:
             return {
                 "success": False,
                 "model": self.model,
-                "error": str(exc),
+                "error": "Failed to connect to AI service.",
                 "raw_text": "",
                 "structured": self._empty_structured(),
             }

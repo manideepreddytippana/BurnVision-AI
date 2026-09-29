@@ -2,11 +2,6 @@ from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
 class AICoachService:
-    """
-    AI Coach service providing personalized workout recommendations,
-    intensity advice, and rest guidance.
-    """
-    
     
     WORKOUT_TEMPLATES = {
         'beginner': [
@@ -35,9 +30,7 @@ class AICoachService:
         pass
     
     def get_recommendations(self, user, recent_workouts: List) -> List[Dict[str, Any]]:
-        """
-        Generate personalized recommendations based on user profile and history.
-        """
+
         recommendations = []
         fitness_level = user.fitness_level or 'intermediate'
         
@@ -45,7 +38,6 @@ class AICoachService:
         workout_days = len(recent_workouts)
         total_calories = sum(w.total_calories or 0 for w in recent_workouts)
         avg_form = sum(w.form_quality_score or 80 for w in recent_workouts) / max(workout_days, 1)
-        
         
         if workout_days < 2:
             recommendations.append({
@@ -66,7 +58,6 @@ class AICoachService:
                 'action': 'Schedule rest day'
             })
         
-        
         if avg_form < 75:
             recommendations.append({
                 'id': 3,
@@ -86,7 +77,6 @@ class AICoachService:
                 'action': 'Try harder exercises'
             })
         
-        
         if total_calories < 1000:
             recommendations.append({
                 'id': 5,
@@ -96,7 +86,7 @@ class AICoachService:
                 'priority': 'medium',
                 'action': 'Try HIIT workout'
             })
-        
+
         
         hour = datetime.now().hour
         if 6 <= hour <= 9:
@@ -112,12 +102,9 @@ class AICoachService:
         return recommendations[:5]  
     
     def suggest_workout(self, user, goal: str, available_time: int, energy_level: str) -> Dict[str, Any]:
-        """
-        Suggest a specific workout based on user preferences and current state.
-        """
+
         fitness_level = user.fitness_level or 'intermediate'
         templates = self.WORKOUT_TEMPLATES.get(fitness_level, self.WORKOUT_TEMPLATES['intermediate'])
-        
         
         suitable_workouts = [w for w in templates if w['duration'] <= available_time]
         
@@ -134,7 +121,6 @@ class AICoachService:
                 'cooldown': 2,
                 'tips': ['Focus on quality over quantity', 'Stay hydrated']
             }
-        
         
         if energy_level == 'high':
             workout = max(suitable_workouts, key=lambda x: x['calories_target'])
@@ -155,7 +141,6 @@ class AICoachService:
         }
     
     def _generate_exercise_list(self, goal: str, duration: int, energy_level: str) -> List[Dict]:
-        """Generate exercise list based on goal and duration"""
         exercises = []
         
         if goal == 'weight_loss' or goal == 'cardio':
@@ -190,7 +175,6 @@ class AICoachService:
         return exercises
     
     def _get_workout_tips(self, goal: str, energy_level: str) -> List[str]:
-        """Get tips based on goal and energy level"""
         tips = ['Stay hydrated throughout your workout']
         
         if energy_level == 'low':
@@ -208,9 +192,6 @@ class AICoachService:
         return tips
     
     def get_intensity_advice(self, user, recent_workouts: List) -> Dict[str, Any]:
-        """
-        Analyze training patterns and advise on intensity adjustments.
-        """
         if not recent_workouts:
             return {
                 'current_trend': 'unknown',
@@ -219,13 +200,11 @@ class AICoachService:
                 'reasoning': 'No recent workout data available for analysis'
             }
         
-        
         form_scores = [w.form_quality_score or 80 for w in recent_workouts]
         calories_per_workout = [w.total_calories or 0 for w in recent_workouts]
         
         avg_form = sum(form_scores) / len(form_scores)
         avg_calories = sum(calories_per_workout) / len(calories_per_workout)
-        
         
         if len(calories_per_workout) >= 3:
             recent_trend = calories_per_workout[-3:]
@@ -237,7 +216,6 @@ class AICoachService:
                 trend = 'stable'
         else:
             trend = 'stable'
-        
         
         if avg_form < 75:
             recommendation = 'Reduce intensity and focus on form quality'
@@ -265,9 +243,6 @@ class AICoachService:
         }
     
     def get_rest_recommendation(self, user, recent_workouts: List) -> Dict[str, Any]:
-        """
-        Analyze training load and recommend rest days.
-        """
         if not recent_workouts:
             return {
                 'needs_rest': False,
@@ -275,7 +250,6 @@ class AICoachService:
                 'message': 'Start working out to build your fitness base!',
                 'fatigue_score': 0
             }
-        
         
         now = datetime.utcnow()
         last_7_days = [w for w in recent_workouts 
@@ -293,12 +267,10 @@ class AICoachService:
             else:
                 break
         
-        
         workout_count = len(last_7_days)
         total_intensity = sum(1 for w in last_7_days if (w.total_calories or 0) > 300)
         
         fatigue_score = min(100, (workout_count * 10) + (consecutive_days * 15) + (total_intensity * 10))
-        
         
         if consecutive_days >= 5:
             needs_rest = True

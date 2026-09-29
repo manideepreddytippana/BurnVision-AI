@@ -3,12 +3,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
 
 class AnomalyDetectionService:
-    """
-    Anomaly detection service for identifying overtraining, fatigue,
-    and injury risk patterns in workout data.
-    """
-    
-    
+
     THRESHOLDS = {
         'fatigue_score': 75,
         'overtraining_days': 5,
@@ -22,11 +17,7 @@ class AnomalyDetectionService:
         self.autoencoder = None  
     
     def detect_anomalies(self, user_id: int, workout_history: List, current_metrics: Dict) -> Dict[str, Any]:
-        """
-        Detect various types of anomalies in workout patterns.
-        
-        Returns alerts for overtraining, fatigue, and injury risk.
-        """
+
         alerts = []
         
         
@@ -39,7 +30,6 @@ class AnomalyDetectionService:
                 'suggestion': overtraining_result['suggestion']
             })
         
-        
         fatigue_result = self._check_fatigue(workout_history, current_metrics)
         if fatigue_result['detected']:
             alerts.append({
@@ -48,8 +38,7 @@ class AnomalyDetectionService:
                 'message': fatigue_result['message'],
                 'suggestion': fatigue_result['suggestion']
             })
-        
-        
+            
         injury_result = self._check_injury_risk(current_metrics, workout_history)
         if injury_result['detected']:
             alerts.append({
@@ -77,9 +66,7 @@ class AnomalyDetectionService:
         
         high_intensity_days = sum(1 for w in last_week if (w.total_calories or 0) > 400)
         
-        
         consecutive_days = self._count_consecutive_days(workout_history)
-        
         
         form_scores = [w.form_quality_score or 80 for w in last_week]
         if len(form_scores) >= 3:
@@ -88,7 +75,6 @@ class AnomalyDetectionService:
             performance_decline = earlier_avg - recent_avg
         else:
             performance_decline = 0
-        
         
         if consecutive_days >= self.THRESHOLDS['overtraining_days']:
             if high_intensity_days >= 4:
@@ -117,14 +103,10 @@ class AnomalyDetectionService:
         return {'detected': False}
     
     def _check_fatigue(self, workout_history: List, current_metrics: Dict) -> Dict[str, Any]:
-        """Detect fatigue indicators"""
         if not workout_history:
             return {'detected': False}
         
-        
         fatigue_score = 0
-        
-        
         now = datetime.utcnow()
         last_3_days = [w for w in workout_history 
                        if w.start_time and (now - w.start_time).days <= 3]
@@ -137,15 +119,12 @@ class AnomalyDetectionService:
         if total_calories_3d > 1000:
             fatigue_score += 20
         
-        
         form_scores = [w.form_quality_score or 80 for w in workout_history[:5]]
         if form_scores and form_scores[0] - form_scores[-1] > 10:
             fatigue_score += 25
         
-        
         if current_metrics.get('resting_heart_rate', 0) > 80:
             fatigue_score += 15
-        
         
         if current_metrics.get('sleep_hours', 8) < 6:
             fatigue_score += 15
@@ -174,7 +153,6 @@ class AnomalyDetectionService:
         risk_score = 0
         risk_factors = []
         
-        
         form_score = current_metrics.get('form_quality', 80)
         if form_score < 60:
             risk_score += 40
@@ -188,13 +166,11 @@ class AnomalyDetectionService:
             risk_score += 25
             risk_factors.append('movement asymmetry detected')
         
-        
         velocity = current_metrics.get('movement_velocity', 0)
         avg_velocity = current_metrics.get('avg_velocity', velocity)
         if avg_velocity > 0 and abs(velocity - avg_velocity) > avg_velocity * self.THRESHOLDS['velocity_deviation']:
             risk_score += 20
             risk_factors.append('unusual movement speed')
-        
         
         if workout_history and len(workout_history) >= 7:
             recent_load = sum(w.total_calories or 0 for w in workout_history[:3])
@@ -237,7 +213,6 @@ class AnomalyDetectionService:
         
         if not sorted_workouts:
             return 0
-        
         consecutive = 1
         prev_date = sorted_workouts[0].start_time.date()
         
@@ -252,7 +227,6 @@ class AnomalyDetectionService:
         return consecutive
     
     def _calculate_overall_risk(self, alerts: List[Dict]) -> int:
-        """Calculate overall risk score from alerts"""
         if not alerts:
             return 0
         
@@ -266,7 +240,6 @@ class AnomalyDetectionService:
         return min(100, total_risk)
     
     def create_alert(self, user_id: int, detection_result: Dict) -> Optional[Dict]:
-        """Create an alert record from detection result"""
         if not detection_result.get('detected'):
             return None
         

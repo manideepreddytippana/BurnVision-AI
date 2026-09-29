@@ -1,9 +1,3 @@
-"""
-Advanced Calorie ML Service - Comprehensive Workout-Based Calorie Prediction
-Provides ML-based calorie burn prediction using the workout_data.csv dataset
-with advanced features like workout type, exercise name, difficulty level, etc.
-"""
-
 import os
 import pandas as pd
 import numpy as np
@@ -33,14 +27,6 @@ except ImportError:
 
 
 class AdvancedCalorieMLService:
-    """
-    Advanced ML Service for calorie burn prediction using workout_data.csv.
-    - Uses comprehensive features: personal details, fitness data, workout details, experience, lifestyle
-    - Pre-trains default models with 80% split
-    - Allows on-demand training with custom splits
-    - Supports multiple ML models: Linear Regression, Random Forest, XGBoost, LightGBM
-    - Provides ensemble predictions
-    """
     
     DEFAULT_TRAIN_SPLIT = 0.8
     MODELS_DIR = Path(__file__).parent.parent / 'models' / 'advanced_trained'
@@ -53,7 +39,6 @@ class AdvancedCalorieMLService:
         'lightgbm': 'LightGBM',
         'ensemble': 'Ensemble (All Models)'
     }
-    
     
     FEATURE_COLS = [
         'Age', 'Gender_Encoded', 'Weight (kg)', 'Height (m)',
@@ -80,38 +65,30 @@ class AdvancedCalorieMLService:
         self._load_or_train_default_models()
     
     def _ensure_models_dir(self):
-        """Create models directory if it doesn't exist"""
         self.MODELS_DIR.mkdir(parents=True, exist_ok=True)
     
     def _load_dataset(self) -> pd.DataFrame:
-        """Load the advanced workout dataset"""
         dataset_path = self.DATASET_DIR / 'workout_data.csv'
         df = pd.read_csv(dataset_path)
-        
         
         df['Gender_Encoded'] = self.label_encoders['gender'].fit_transform(df['Gender'])
         df['Workout_Type_Encoded'] = self.label_encoders['workout_type'].fit_transform(df['Workout_Type'])
         df['Exercise_Encoded'] = self.label_encoders['exercise'].fit_transform(df['Name of Exercise'])
         df['Difficulty_Encoded'] = self.label_encoders['difficulty'].fit_transform(df['Difficulty Level'])
         
-        
         self.exercise_names = sorted(df['Name of Exercise'].unique().tolist())
-        
         return df
     
     def _prepare_features(self, df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
-        """Prepare feature matrix and target vector"""
         X = df[self.FEATURE_COLS].values
         y = df['Calories_Burned'].values
         return X, y
     
     def _get_model_path(self, model_type: str, train_split: float) -> Path:
-        """Get path for saving/loading a model"""
         split_str = str(int(train_split * 100))
         return self.MODELS_DIR / f'{model_type}_{split_str}.pkl'
     
     def _train_model(self, model_type: str, X_train: np.ndarray, y_train: np.ndarray) -> Any:
-        """Train a specific model type"""
         if model_type == 'linear_regression':
             model = LinearRegression()
         elif model_type == 'random_forest':
@@ -131,9 +108,7 @@ class AdvancedCalorieMLService:
         return model
     
     def _load_or_train_default_models(self):
-        """Load pre-trained models or train them if not available"""
         df = self._load_dataset()
-        
         
         preprocessor_path = self.MODELS_DIR / 'preprocessor_advanced.pkl'
         X, y = self.preprocessor.preprocess_training_data(
@@ -166,7 +141,6 @@ class AdvancedCalorieMLService:
                 self.models[model_type] = model
                 print(f"[Advanced] Saved {model_type} model to {model_path}")
             
-            
             y_pred = self.models[model_type].predict(X_test)
             mae = mean_absolute_error(y_test, y_pred)
             mse = mean_squared_error(y_test, y_pred)
@@ -174,11 +148,9 @@ class AdvancedCalorieMLService:
             r2 = r2_score(y_test, y_pred)
             explained_var = explained_variance_score(y_test, y_pred)
             
-            
             tolerance = 0.05
             within_tolerance = np.abs(y_pred - y_test) <= (np.abs(y_test) * tolerance)
             accuracy_pct = np.mean(within_tolerance) * 100
-            
             
             errors = y_pred - y_test
             if np.std(errors) > 0:
@@ -198,8 +170,7 @@ class AdvancedCalorieMLService:
                 'train_split': self.DEFAULT_TRAIN_SPLIT,
                 'test_samples': len(y_test),
                 'error_std': round(float(np.std(errors)), 2)
-            }
-        
+            }      
         
         encoders_path = self.MODELS_DIR / 'label_encoders.pkl'
         joblib.dump(self.label_encoders, encoders_path)
@@ -213,7 +184,6 @@ class AdvancedCalorieMLService:
         
         df = self._load_dataset()
         
-        
         X, y = self.preprocessor.preprocess_training_data(
             df, self.FEATURE_COLS, 'Calories_Burned'
         )
@@ -222,16 +192,12 @@ class AdvancedCalorieMLService:
             X, y, train_size=train_split, random_state=42
         )
         
-        
         model = self._train_model(model_type, X_train, y_train)
-        
         
         model_path = self._get_model_path(model_type, train_split)
         joblib.dump(model, model_path)
         
-        
         self.models[model_type] = model
-        
         
         y_pred = model.predict(X_test)
         mae = mean_absolute_error(y_test, y_pred)
@@ -273,7 +239,7 @@ class AdvancedCalorieMLService:
         }
     
     def _convert_to_native_types(self, obj: Any) -> Any:
-        """Recursively convert numpy types to native Python types for JSON serialization"""
+
         if isinstance(obj, dict):
             return {key: self._convert_to_native_types(value) for key, value in obj.items()}
         elif isinstance(obj, list):
@@ -289,24 +255,13 @@ class AdvancedCalorieMLService:
         return obj
     
     def _encode_categorical(self, value: str, encoder_key: str) -> int:
-        """Safely encode a categorical value, returning 0 for unknown values"""
+
         try:
             return int(self.label_encoders[encoder_key].transform([value])[0])
         except (ValueError, KeyError):
             return 0
     
     def predict(self, features: Dict[str, Any], model_type: str = 'ensemble') -> Dict[str, Any]:
-        """
-        Make calorie prediction with derived metrics
-        
-        Args:
-            features: Dict with all advanced workout parameters
-            model_type: Model to use for prediction
-        
-        Returns:
-            Dict with prediction results and all derived metrics
-        """
-        
         gender = features.get('gender', 'Male')
         gender_encoded = self._encode_categorical(gender, 'gender')
         
@@ -333,7 +288,6 @@ class AdvancedCalorieMLService:
         water_intake = float(features.get('water_intake', 2.0))
         workout_frequency = float(features.get('workout_frequency', 3))
         
-        
         X = pd.DataFrame(
             [[age, gender_encoded, weight_kg, height_m, resting_bpm, avg_bpm,
               workout_type_encoded, exercise_encoded, session_duration_hours,
@@ -342,9 +296,7 @@ class AdvancedCalorieMLService:
             columns=self.FEATURE_COLS
         )
         
-        
         X_scaled = self.preprocessor.preprocess_prediction_input(X.values)
-        
         
         if model_type == 'ensemble':
             predictions = []
@@ -364,7 +316,6 @@ class AdvancedCalorieMLService:
             predicted_calories = float(self.models[model_type].predict(X_scaled)[0])
             confidence = self.model_metrics.get(model_type, {}).get('r2_score', 0.8)
         
-        
         derived_metrics = self._calculate_derived_metrics(
             gender, age, height_m, weight_kg, resting_bpm, avg_bpm,
             workout_type, exercise_name, session_duration_hours * 60,
@@ -372,9 +323,7 @@ class AdvancedCalorieMLService:
             workout_frequency, predicted_calories
         )
         
-        
         derived_metrics = self._convert_to_native_types(derived_metrics)
-        
         
         if model_type == 'ensemble':
             all_metrics = [self.model_metrics.get(m, {}) for m in self.models.keys()]
@@ -404,9 +353,7 @@ class AdvancedCalorieMLService:
         experience_level: float, water_intake: float, workout_frequency: float,
         calories: float
     ) -> Dict[str, Any]:
-        """Calculate comprehensive derived metrics from input data"""
-        
-        
+
         bmi = round(weight_kg / (height_m ** 2), 1)
         
         if bmi < 18.5:
@@ -418,12 +365,10 @@ class AdvancedCalorieMLService:
         else:
             bmi_category = 'Obese'
         
-        
         max_hr = 220 - age
         hr_reserve = max_hr - resting_bpm
         hr_percent = round((avg_bpm / max_hr) * 100, 1)
         pct_hrr = round(((avg_bpm - resting_bpm) / hr_reserve) * 100, 1) if hr_reserve > 0 else 0
-        
         
         if hr_percent < 50:
             hr_zone = {'zone': 1, 'label': 'Very Light', 'range': '50-60%'}
@@ -438,7 +383,6 @@ class AdvancedCalorieMLService:
         else:
             hr_zone = {'zone': 5, 'label': 'Max Effort', 'range': '90-100%'}
         
-        
         if hr_percent < 60:
             intensity_level = 'Low'
         elif hr_percent <= 75:
@@ -448,12 +392,10 @@ class AdvancedCalorieMLService:
         
         effort_score = round(avg_bpm * (duration_min / 60), 0)
         
-        
         calories_per_min = round(calories / duration_min, 2) if duration_min > 0 else 0
         calories_per_hour = round(calories / (duration_min / 60), 1) if duration_min > 0 else 0
         total_volume = round(sets * reps, 0)
-        workout_load = round(duration_min * (hr_percent / 100), 1)
-        
+        workout_load = round(duration_min * (hr_percent / 100), 1)   
         
         if age < 20:
             age_group = 'Teen'
@@ -469,8 +411,7 @@ class AdvancedCalorieMLService:
         elif height_m <= 1.80:
             height_category = 'Average'
         else:
-            height_category = 'Tall'
-        
+            height_category = 'Tall'        
         
         if experience_level >= 2.5:
             fitness_label = 'Advanced'
@@ -478,12 +419,10 @@ class AdvancedCalorieMLService:
             fitness_label = 'Intermediate'
         else:
             fitness_label = 'Beginner'
-        
-        
+               
         recommended_water = weight_kg * 0.033  
         hydration_status = 'Good' if water_intake >= recommended_water * 0.8 else 'Low'
-        
-        
+              
         recovery_score = 100
         if resting_bpm > 80:
             recovery_score -= 15
@@ -494,12 +433,10 @@ class AdvancedCalorieMLService:
         elif workout_frequency > 4:
             recovery_score -= 5
         recovery_score = max(0, min(100, recovery_score))
-        
-        
+              
         risk_flag = hr_percent > 90 or (age > 50 and hr_percent > 85)
         overtraining_risk = workout_frequency >= 6 and difficulty == 'Advanced'
-        
-        
+          
         if gender.lower() == 'male':
             fat_pct_est = round(1.20 * bmi + 0.23 * age - 16.2, 1)
         else:
@@ -551,7 +488,6 @@ class AdvancedCalorieMLService:
         }
     
     def get_available_models(self) -> Dict[str, Any]:
-        """Get information about available models"""
         available = {}
         for model_type, display_name in self.MODEL_TYPES.items():
             if model_type == 'ensemble':
@@ -660,8 +596,7 @@ class AdvancedCalorieMLService:
                     kept_files.append(str(model_file.name))
             else:
                 kept_files.append(str(model_file.name))
-        
-        
+    
         self.models.clear()
         self.model_metrics.clear()
         self._load_or_train_default_models()
@@ -673,12 +608,9 @@ class AdvancedCalorieMLService:
             'message': f'Cleaned up {len(deleted_files)} custom model(s), kept {len(kept_files)} default model(s)'
         }
 
-
-
 _advanced_ml_service: Optional[AdvancedCalorieMLService] = None
 
 def get_advanced_ml_service() -> AdvancedCalorieMLService:
-    """Get or create the Advanced ML service singleton"""
     global _advanced_ml_service
     if _advanced_ml_service is None:
         _advanced_ml_service = AdvancedCalorieMLService()
