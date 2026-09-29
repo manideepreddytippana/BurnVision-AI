@@ -24,8 +24,14 @@ def register(validated_data):
         name=validated_data['name']
     )
     if not password_validation.is_valid:
+        error_msg = 'Password must contain at least one lowercase, uppercase, number, and special character.'
+        
+        # Check if the error is specifically about name or email
+        if any('name' in err.lower() or 'email' in err.lower() for err in password_validation.errors):
+            error_msg = "Password shouldn't contain your name or email."
+            
         return jsonify({
-            'message': 'Password must contain at least one lowercase, uppercase, number, and special character.',
+            'message': error_msg,
             'errors': password_validation.errors
         }), 422
     
