@@ -709,6 +709,7 @@ export default function CaloriePrediction(): JSX.Element {
                                                     strokeDasharray="141.37 282.74"
                                                     className="animate-spin"
                                                     style={{
+                                                        transformOrigin: '50px 50px',
                                                         animation: 'spin 2s linear infinite'
                                                     }}
                                                 />

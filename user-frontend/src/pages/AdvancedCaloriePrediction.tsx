@@ -932,6 +932,10 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                     strokeLinecap="round"
                                                     strokeDasharray="141.37 282.74"
                                                     className="advanced-spinner"
+                                                    style={{
+                                                        transformOrigin: '50px 50px',
+                                                        animation: 'spin 2s linear infinite'
+                                                    }}
                                                 />
                                                 <defs>
                                                     <linearGradient id="violetGradientAdv" x1="0%" y1="0%" x2="100%" y2="100%">

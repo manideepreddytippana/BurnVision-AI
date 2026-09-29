@@ -11,14 +11,14 @@ export function LoadingBar() {
         setIsLoading(true)
         setProgress(30)
 
-        const timer1 = setTimeout(() => setProgress(70), 100)
+        const timer1 = setTimeout(() => setProgress(70), 300)
+        
         const timer2 = setTimeout(() => {
             setProgress(100)
             setTimeout(() => {
                 setIsLoading(false)
-                setProgress(0)
-            }, 100)
-        }, 100)
+            }, 300) // Wait for the bar to visually reach 100% before fading out
+        }, 600)
 
         window.scrollTo(0, 0)
 
