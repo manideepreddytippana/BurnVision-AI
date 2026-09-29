@@ -15,7 +15,7 @@ migrate = Migrate()
 
 jwt = JWTManager()
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
@@ -24,22 +24,25 @@ def create_app():
     
     app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(
-        seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES'))
+        seconds=int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES', '3600'))
     )
     app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(
-        seconds=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES'))
+        seconds=int(os.getenv('JWT_REFRESH_TOKEN_EXPIRES', '2592000'))
     )
-    app.config['SARVAM_API_KEY'] = os.getenv('SARVAM_API_KEY')
-    app.config['SARVAM_AI_MODEL'] = os.getenv('SARVAM_AI_MODEL')
+    app.config['SARVAM_API_KEY'] = os.getenv('SARVAM_API_KEY') or os.getenv('SARVAM_AI_API_KEY')
+    app.config['SARVAM_AI_MODEL'] = os.getenv('SARVAM_AI_MODEL') or os.getenv('SARVAM_MODEL', 'sarvam-105b')
     app.config['SARVAM_AI_TIMEOUT'] = int(os.getenv('SARVAM_AI_TIMEOUT', '200'))
     
     # Enforce request size limits to prevent DoS via large payloads (default 1MB)
     max_mb = int(os.getenv('MAX_CONTENT_LENGTH_MB', '1'))
     app.config['MAX_CONTENT_LENGTH'] = max_mb * 1024 * 1024
 
-    if not app.config.get('SECRET_KEY'):
+    if test_config:
+        app.config.update(test_config)
+
+    if not app.config.get('SECRET_KEY') and not app.config.get('TESTING'):
         raise ValueError("No SECRET_KEY set for Flask application")
-    if not app.config.get('JWT_SECRET_KEY'):
+    if not app.config.get('JWT_SECRET_KEY') and not app.config.get('TESTING'):
         raise ValueError("No JWT_SECRET_KEY set for Flask application")
 
     db.init_app(app)
