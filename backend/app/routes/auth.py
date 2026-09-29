@@ -18,7 +18,7 @@ def register(validated_data):
         return jsonify({'message': 'Email already registered'}), 409
     
     policy_service = get_password_policy_service()
-    password_validation = policy_service.validate(
+    password_validation = policy_service.validate_password(
         password=validated_data['password'],
         email=validated_data['email'],
         name=validated_data['name']
