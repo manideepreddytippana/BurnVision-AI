@@ -1,3 +1,4 @@
+import logging
 import json
 from datetime import datetime
 
@@ -12,24 +13,26 @@ from app.models import (
     CaloriePredictionExplanation,
 )
 from app.services.sarvam_ai_service import get_sarvam_ai_service
+from app.rate_limiter import limiter, RATE_LIMIT_COMPUTE, RATE_LIMIT_READ
+from app.schemas import validate_with
+from app.schemas.ai import EvaluatePredictionSchema, EvaluateAdvancedPredictionSchema
+
+logger = logging.getLogger(__name__)
 
 ai_bp = Blueprint("ai", __name__)
 
 
 @ai_bp.route("/evaluate", methods=["POST"])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def evaluate_prediction():
-    """Evaluate a calorie prediction with Sarvam AI and persist the structured insights."""
+@validate_with(EvaluatePredictionSchema)
+def evaluate_prediction(validated_data):
+    
     try:
         user_id = int(get_jwt_identity())
-        data = request.get_json() or {}
-
-        prediction_id = data.get("prediction_id")
-        if not prediction_id:
-            return jsonify({"error": "prediction_id is required"}), 400
 
         prediction = CaloriePrediction.query.filter_by(
-            id=int(prediction_id), user_id=user_id
+            id=validated_data['prediction_id'], user_id=user_id
         ).first()
         if not prediction:
             return jsonify({"error": "Prediction not found"}), 404
@@ -102,26 +105,23 @@ def evaluate_prediction():
         }), 200
 
     except ValueError:
-        return jsonify({"error": "prediction_id must be a valid integer"}), 400
+        return jsonify({"error": "Invalid prediction parameters."}), 400
     except Exception as exc:
         db.session.rollback()
-        return jsonify({"error": str(exc)}), 500
-
+        logger.error('evaluate_prediction failed: %s', exc, exc_info=True)
+        return jsonify({"error": "AI evaluation failed. Please try again later."}), 500
 
 @ai_bp.route("/advanced-evaluate", methods=["POST"])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def evaluate_advanced_prediction():
-    """Evaluate an advanced calorie prediction with Sarvam AI and persist the structured insights."""
+@validate_with(EvaluateAdvancedPredictionSchema)
+def evaluate_advanced_prediction(validated_data):
+    
     try:
         user_id = int(get_jwt_identity())
-        data = request.get_json() or {}
-
-        prediction_id = data.get("prediction_id")
-        if not prediction_id:
-            return jsonify({"error": "prediction_id is required"}), 400
 
         prediction = AdvancedCaloriePrediction.query.filter_by(
-            id=int(prediction_id), user_id=user_id
+            id=validated_data['prediction_id'], user_id=user_id
         ).first()
         if not prediction:
             return jsonify({"error": "Prediction not found"}), 404
@@ -205,16 +205,18 @@ def evaluate_advanced_prediction():
         }), 200
 
     except ValueError:
-        return jsonify({"error": "prediction_id must be a valid integer"}), 400
+        return jsonify({"error": "Invalid prediction parameters."}), 400
     except Exception as exc:
         db.session.rollback()
-        return jsonify({"error": str(exc)}), 500
+        logger.error('evaluate_advanced_prediction failed: %s', exc, exc_info=True)
+        return jsonify({"error": "AI evaluation failed. Please try again later."}), 500
 
 
 @ai_bp.route("/prediction-insights", methods=["GET"])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_prediction_insights():
-    """Return all persisted Sarvam insights paired with main prediction card data."""
+
     try:
         user_id = int(get_jwt_identity())
         page = request.args.get("page", 1, type=int)
@@ -235,13 +237,14 @@ def get_prediction_insights():
             }
         ), 200
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
-
+        logger.error('get_evaluation_history failed: %s', exc, exc_info=True)
+        return jsonify({"error": "Failed to retrieve evaluation history."}), 500
 
 @ai_bp.route("/advanced-prediction-insights", methods=["GET"])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_advanced_prediction_insights():
-    """Return all persisted Sarvam insights paired with advanced prediction card data."""
+    
     try:
         user_id = int(get_jwt_identity())
         page = request.args.get("page", 1, type=int)
@@ -262,4 +265,5 @@ def get_advanced_prediction_insights():
             }
         ), 200
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        logger.error('get_advanced_evaluation_history failed: %s', exc, exc_info=True)
+        return jsonify({"error": "Failed to retrieve evaluation history."}), 500

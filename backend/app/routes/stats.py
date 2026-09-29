@@ -6,10 +6,12 @@ from io import BytesIO
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
+from app.rate_limiter import limiter, RATE_LIMIT_READ
 
 stats_bp = Blueprint('stats', __name__)
 
 @stats_bp.route('/dashboard', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_dashboard_stats():
     user_id = int(get_jwt_identity())
@@ -38,8 +40,8 @@ def get_dashboard_stats():
         'period_days': days
     }), 200
 
-
 @stats_bp.route('/calorie-trends', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_calorie_trends():
     user_id = int(get_jwt_identity())
@@ -64,8 +66,8 @@ def get_calorie_trends():
         'trends': list(trends.values())
     }), 200
 
-
 @stats_bp.route('/exercise-comparison', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_exercise_comparison():
     user_id = int(get_jwt_identity())
@@ -97,8 +99,8 @@ def get_exercise_comparison():
         'comparison': list(comparison.values())
     }), 200
 
-
 @stats_bp.route('/export-pdf', methods=['GET'])
+@limiter.limit("5 per minute; 30 per hour")
 @jwt_required()
 def export_pdf():
     user_id = int(get_jwt_identity())
@@ -111,7 +113,6 @@ def export_pdf():
         Workout.start_time >= start_date
     ).order_by(Workout.start_time.desc()).all()
     
-    # PDF creation
     buffer = BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
     width, height = letter

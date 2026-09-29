@@ -1,140 +1,108 @@
-"""
-Advanced Calorie Prediction API Routes
-Provides endpoints for advanced ML-based calorie prediction with comprehensive workout features.
-"""
-
+import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import User, AdvancedCaloriePrediction
 from app.services.advanced_calorie_ml_service import get_advanced_ml_service
+from app.rate_limiter import limiter, RATE_LIMIT_COMPUTE, RATE_LIMIT_READ, RATE_LIMIT_WRITE
+from app.schemas import validate_with
+from app.schemas.prediction import AdvancedCaloriePredictSchema, TrainModelSchema
+
+logger = logging.getLogger(__name__)
 
 advanced_calorie_predict_bp = Blueprint('advanced_calorie_predict', __name__)
 
-
 @advanced_calorie_predict_bp.route('/models', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_available_models():
-    """Get information about available advanced ML models"""
+
     try:
         ml_service = get_advanced_ml_service()
         models_info = ml_service.get_available_models()
         return jsonify(models_info), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+        logger.error('get_available_models failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Failed to retrieve model information.'}), 500
 
 @advanced_calorie_predict_bp.route('/models/comparison', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_model_comparison():
-    """Get comprehensive model comparison data for visualizations"""
+
     try:
         ml_service = get_advanced_ml_service()
         comparison_data = ml_service.get_model_comparison()
         return jsonify(comparison_data), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
+        logger.error('get_model_comparison failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Failed to retrieve model comparison data.'}), 500
 
 @advanced_calorie_predict_bp.route('/cleanup-custom', methods=['POST'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
 def cleanup_custom_models():
-    """Delete all custom-trained advanced models"""
+
     try:
         ml_service = get_advanced_ml_service()
         result = ml_service.cleanup_custom_models()
         return jsonify(result), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error('cleanup_custom_models failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Failed to clean up custom models.'}), 500
 
 
 @advanced_calorie_predict_bp.route('/predict', methods=['POST'])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def predict_calories():
-    """
-    Make an advanced calorie burn prediction
-    
-    Request body:
-    {
-        "gender": "Male" | "Female",
-        "age": int,
-        "weight": float (kg),
-        "height": float (m),
-        "resting_heart_rate": float (bpm),
-        "avg_heart_rate": float (bpm),
-        "workout_type": "Cardio" | "Strength" | "HIIT" | "Yoga",
-        "exercise_name": string,
-        "session_duration": float (minutes),
-        "sets": float,
-        "reps": float,
-        "difficulty_level": "Beginner" | "Intermediate" | "Advanced",
-        "experience_level": float (1-3),
-        "water_intake": float (liters),
-        "workout_frequency": float (days/week),
-        "model_type": "linear_regression" | "random_forest" | "xgboost" | "lightgbm" | "ensemble"
-    }
-    """
+@validate_with(AdvancedCaloriePredictSchema)
+def predict_calories(validated_data):
+
     try:
         user_id = int(get_jwt_identity())
-        data = request.get_json()
         
-        
-        required_fields = [
-            'gender', 'age', 'weight', 'height',
-            'resting_heart_rate', 'avg_heart_rate',
-            'workout_type', 'exercise_name', 'session_duration',
-            'sets', 'reps', 'difficulty_level',
-            'experience_level', 'water_intake', 'workout_frequency'
-        ]
-        for field in required_fields:
-            if field not in data:
-                return jsonify({'error': f'Missing required field: {field}'}), 400
-        
-        
-        model_type = data.get('model_type', 'ensemble')
-        train_split = data.get('train_split', 0.8)
-        
+        model_type = validated_data.get('model_type', 'ensemble')
+        train_split = validated_data.get('train_split', 0.8)
         
         ml_service = get_advanced_ml_service()
         result = ml_service.predict(
             features={
-                'gender': data['gender'],
-                'age': int(data['age']),
-                'weight': float(data['weight']),
-                'height': float(data['height']),
-                'resting_heart_rate': float(data['resting_heart_rate']),
-                'avg_heart_rate': float(data['avg_heart_rate']),
-                'workout_type': data['workout_type'],
-                'exercise_name': data['exercise_name'],
-                'session_duration': float(data['session_duration']),
-                'sets': float(data['sets']),
-                'reps': float(data['reps']),
-                'difficulty_level': data['difficulty_level'],
-                'experience_level': float(data['experience_level']),
-                'water_intake': float(data['water_intake']),
-                'workout_frequency': float(data['workout_frequency'])
+                'gender': validated_data['gender'],
+                'age': validated_data['age'],
+                'weight': validated_data['weight'],
+                'height': validated_data['height'],
+                'resting_heart_rate': validated_data['resting_heart_rate'],
+                'avg_heart_rate': validated_data['avg_heart_rate'],
+                'workout_type': validated_data['workout_type'],
+                'exercise_name': validated_data['exercise_name'],
+                'session_duration': validated_data['session_duration'],
+                'sets': validated_data['sets'],
+                'reps': validated_data['reps'],
+                'difficulty_level': validated_data['difficulty_level'],
+                'experience_level': validated_data['experience_level'],
+                'water_intake': validated_data['water_intake'],
+                'workout_frequency': validated_data['workout_frequency']
             },
             model_type=model_type
         )
         
-        
         prediction = AdvancedCaloriePrediction(
             user_id=user_id,
-            gender=data['gender'],
-            age=int(data['age']),
-            weight=float(data['weight']),
-            height=float(data['height']),
-            resting_heart_rate=float(data['resting_heart_rate']),
-            avg_heart_rate=float(data['avg_heart_rate']),
-            workout_type=data['workout_type'],
-            exercise_name=data['exercise_name'],
-            session_duration=float(data['session_duration']),
-            sets=float(data['sets']),
-            reps=float(data['reps']),
-            difficulty_level=data['difficulty_level'],
-            experience_level=float(data['experience_level']),
-            water_intake=float(data['water_intake']),
-            workout_frequency=float(data['workout_frequency']),
+            gender=validated_data['gender'],
+            age=validated_data['age'],
+            weight=validated_data['weight'],
+            height=validated_data['height'],
+            resting_heart_rate=validated_data['resting_heart_rate'],
+            avg_heart_rate=validated_data['avg_heart_rate'],
+            workout_type=validated_data['workout_type'],
+            exercise_name=validated_data['exercise_name'],
+            session_duration=validated_data['session_duration'],
+            sets=validated_data['sets'],
+            reps=validated_data['reps'],
+            difficulty_level=validated_data['difficulty_level'],
+            experience_level=validated_data['experience_level'],
+            water_intake=validated_data['water_intake'],
+            workout_frequency=validated_data['workout_frequency'],
             predicted_calories=result['predicted_calories'],
             confidence_score=result['confidence_score'],
             model_type=model_type,
@@ -144,52 +112,48 @@ def predict_calories():
         
         db.session.add(prediction)
         db.session.commit()
-        
+
         result['prediction_id'] = prediction.id
-        
+
         return jsonify(result), 200
-        
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+
+    except ValueError:
+        return jsonify({'error': 'Invalid prediction parameters.'}), 400
     except Exception as e:
         db.session.rollback()
-        return jsonify({'error': str(e)}), 500
-
+        logger.error('predict_calories failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Prediction failed. Please try again later.'}), 500
 
 @advanced_calorie_predict_bp.route('/train', methods=['POST'])
+@limiter.limit("3 per minute; 20 per hour")
 @jwt_required()
-def train_model():
-    """Train an advanced model with custom train split"""
+@validate_with(TrainModelSchema)
+def train_model(validated_data):
+    
     try:
-        data = request.get_json()
-        
-        model_type = data.get('model_type')
-        train_split = data.get('train_split', 0.8)
-        
-        if not model_type:
-            return jsonify({'error': 'model_type is required'}), 400
+        model_type = validated_data['model_type']
+        train_split = validated_data.get('train_split', 0.8)
         
         if model_type == 'ensemble':
             return jsonify({'error': 'Cannot train ensemble directly'}), 400
-        
-        if not 0.5 <= train_split <= 0.9:
-            return jsonify({'error': 'train_split must be between 0.5 and 0.9'}), 400
         
         ml_service = get_advanced_ml_service()
         result = ml_service.train_custom_model(model_type, train_split)
         
         return jsonify(result), 200
         
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
+    except ValueError:
+        return jsonify({'error': 'Invalid training parameters.'}), 400
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error('train_model failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Model training failed. Please try again later.'}), 500
 
 
 @advanced_calorie_predict_bp.route('/history', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_prediction_history():
-    """Get user's advanced prediction history"""
+
     try:
         user_id = int(get_jwt_identity())
         
@@ -208,13 +172,15 @@ def get_prediction_history():
         }), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error('get_prediction_history failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Failed to retrieve prediction history.'}), 500
 
 
 @advanced_calorie_predict_bp.route('/history/<int:prediction_id>', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_prediction_detail(prediction_id):
-    """Get a specific advanced prediction by ID"""
+
     try:
         user_id = int(get_jwt_identity())
         
@@ -229,4 +195,5 @@ def get_prediction_detail(prediction_id):
         return jsonify(prediction.to_dict()), 200
         
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error('get_prediction_detail failed: %s', e, exc_info=True)
+        return jsonify({'error': 'Failed to retrieve prediction details.'}), 500

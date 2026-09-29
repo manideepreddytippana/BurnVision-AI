@@ -12,17 +12,19 @@ from app.models import (
     Workout,
 )
 from app.services.sarvam_ai_service import get_sarvam_ai_service
+from app.services.calorie_validation_service import get_calorie_validation_service
+from app.rate_limiter import limiter, RATE_LIMIT_COMPUTE, RATE_LIMIT_READ, RATE_LIMIT_WRITE
 from datetime import datetime, timedelta
 from sqlalchemy import func
-
+from app.schemas import validate_with
+from app.schemas.workout import StartWorkoutSchema, EndWorkoutSchema, SaveLiveSessionSchema, MotionFrameSchema
 
 workout_bp = Blueprint('workout', __name__)
 
 
 def _build_live_session_ai_summary(ai_payload):
-    """Build fixed 3-line summary from Sarvam structured output."""
-    structured = (ai_payload or {}).get('structured') or {}
 
+    structured = (ai_payload or {}).get('structured') or {}
     workout_anomalies = structured.get('workout_anomalies') or []
     behavioral_anomalies = structured.get('behavioral_anomalies') or []
     overtraining_detection = structured.get('overtraining_detection') or []
@@ -59,31 +61,30 @@ def _build_live_session_ai_summary(ai_payload):
     ]
 
 @workout_bp.route('/start', methods=['POST'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
-def start_workout():
+@validate_with(StartWorkoutSchema)
+def start_workout(validated_data):
     user_id = int(get_jwt_identity())
-    data = request.get_json() or {}
     
     user = User.query.get(user_id)
     
-    
     workout = Workout(
         user_id=user_id,
-        room_id=data.get('room_id'),
-        environment=data.get('environment', 'indoor'),
-        exercise_type=data.get('exercise_type'),
+        room_id=validated_data.get('room_id'),
+        environment=validated_data.get('environment', 'indoor'),
+        exercise_type=validated_data.get('exercise_type'),
         context_factors={
             'time_of_day': datetime.now().strftime('%H:%M'),
-            'weather': data.get('weather'),
-            'fatigue_score': data.get('fatigue_score', 0)
+            'weather': validated_data.get('weather'),
+            'fatigue_score': validated_data.get('fatigue_score', 0)
         }
     )
-    
     
     live_session = LiveWorkoutSession(
         user_id=user_id,
         session_date=datetime.utcnow().date(),
-        user_weight=user.weight if user else data.get('weight', 70)
+        user_weight=user.weight if user else validated_data.get('weight', 70)
     )
     
     db.session.add(workout)
@@ -96,10 +97,11 @@ def start_workout():
         'live_session_id': live_session.id
     }), 201
 
-
 @workout_bp.route('/<int:workout_id>/end', methods=['POST'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
-def end_workout(workout_id):
+@validate_with(EndWorkoutSchema)
+def end_workout(workout_id, validated_data):
     user_id = int(get_jwt_identity())
     workout = Workout.query.filter_by(id=workout_id, user_id=user_id).first()
     
@@ -109,16 +111,37 @@ def end_workout(workout_id):
     if workout.end_time:
         return jsonify({'message': 'Workout already ended'}), 400
     
-    data = request.get_json() or {}
+    end_time = datetime.utcnow()
+    client_total_calories = validated_data.get('total_calories', 0)
     
-    workout.end_time = datetime.utcnow()
-    workout.total_calories = data.get('total_calories', 0)
-    workout.form_quality_score = data.get('form_quality_score')
+    if workout.start_time and client_total_calories > 0:
+        user = User.query.get(user_id)
+        user_weight = user.weight if user and user.weight else 70.0
+        duration_seconds = (end_time - workout.start_time).total_seconds()
+        
+        calorie_validator = get_calorie_validation_service()
+        validation_result = calorie_validator.validate_end_workout(
+            client_total_calories=client_total_calories,
+            duration_seconds=duration_seconds,
+            user_weight=user_weight,
+        )
+        
+        if validation_result.is_rejected:
+            return jsonify({
+                'error': {
+                    'code': 'CALORIE_VALIDATION_REJECTED',
+                    'message': 'Reported calorie values are physiologically impossible.',
+                    'validation': validation_result.to_dict(),
+                }
+            }), 422
     
+    workout.end_time = end_time
+    workout.total_calories = client_total_calories
+    workout.form_quality_score = validated_data.get('form_quality_score')
     
-    if data.get('context_factors'):
+    if validated_data.get('context_factors'):
         existing_context = workout.context_factors or {}
-        existing_context.update(data.get('context_factors'))
+        existing_context.update(validated_data.get('context_factors'))
         workout.context_factors = existing_context
     
     db.session.commit()
@@ -128,47 +151,44 @@ def end_workout(workout_id):
         'workout': workout.to_dict()
     }), 200
 
-
-
 @workout_bp.route('/session/save', methods=['POST'])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def save_live_session():
+@validate_with(SaveLiveSessionSchema)
+def save_live_session(validated_data):
     try:
         user_id = int(get_jwt_identity())
-        data = request.get_json() or {}
         
         user = User.query.get(user_id)
         
-        
         exercises = []
-        if data.get('squat_reps', 0) > 0:
+        if validated_data.get('squat_reps', 0) > 0:
             exercises.append('squat')
-        if data.get('pushup_reps', 0) > 0:
+        if validated_data.get('pushup_reps', 0) > 0:
             exercises.append('pushup')
-        if data.get('lunge_reps', 0) > 0:
+        if validated_data.get('lunge_reps', 0) > 0:
             exercises.append('lunge')
-        if data.get('jumping_jack_reps', 0) > 0:
+        if validated_data.get('jumping_jack_reps', 0) > 0:
             exercises.append('jumping_jack')
-        if data.get('high_knee_reps', 0) > 0:
+        if validated_data.get('high_knee_reps', 0) > 0:
             exercises.append('high_knee')
-        if data.get('burpee_reps', 0) > 0:
+        if validated_data.get('burpee_reps', 0) > 0:
             exercises.append('burpee')
-        if data.get('plank_seconds', 0) > 0:
+        if validated_data.get('plank_seconds', 0) > 0:
             exercises.append('plank')
 
-        if data.get('situp_reps', 0) > 0:
+        if validated_data.get('situp_reps', 0) > 0:
             exercises.append('situp')
-        if data.get('leg_raise_reps', 0) > 0:
+        if validated_data.get('leg_raise_reps', 0) > 0:
             exercises.append('leg_raise')
-        if data.get('bicycle_crunch_reps', 0) > 0:
+        if validated_data.get('bicycle_crunch_reps', 0) > 0:
             exercises.append('bicycle_crunch')
         
         exercises_done = ','.join(exercises) if exercises else 'none'
         
-        
         start_time = datetime.utcnow()
-        if data.get('start_time'):
-            start_time_str = data.get('start_time')
+        if validated_data.get('start_time'):
+            start_time_str = validated_data.get('start_time')
             
             if start_time_str.endswith('Z'):
                 start_time_str = start_time_str[:-1] + '+00:00'
@@ -177,65 +197,80 @@ def save_live_session():
             except ValueError:
                 start_time = datetime.utcnow()
         
-        
         total_reps = (
-            data.get('squat_reps', 0) + data.get('pushup_reps', 0) +
-            data.get('lunge_reps', 0) + data.get('jumping_jack_reps', 0) +
-            data.get('high_knee_reps', 0) + data.get('burpee_reps', 0) +
-            data.get('situp_reps', 0) +
-            data.get('leg_raise_reps', 0) + data.get('bicycle_crunch_reps', 0)
+            validated_data.get('squat_reps', 0) + validated_data.get('pushup_reps', 0) +
+            validated_data.get('lunge_reps', 0) + validated_data.get('jumping_jack_reps', 0) +
+            validated_data.get('high_knee_reps', 0) + validated_data.get('burpee_reps', 0) +
+            validated_data.get('situp_reps', 0) +
+            validated_data.get('leg_raise_reps', 0) + validated_data.get('bicycle_crunch_reps', 0)
         )
         
-        
-        frontend_active_minutes = data.get('active_minutes', 0)
+        frontend_active_minutes = validated_data.get('active_minutes', 0)
         if frontend_active_minutes < 0.1 and start_time:
-            
             time_diff = (datetime.utcnow() - start_time.replace(tzinfo=None) if start_time.tzinfo else datetime.utcnow() - start_time)
             frontend_active_minutes = round(time_diff.total_seconds() / 60, 2)
         
+        user_weight = validated_data.get('weight', user.weight if user else 70)
+        
+        calorie_validator = get_calorie_validation_service()
+        calorie_validation = calorie_validator.validate_live_session(
+            data=validated_data,
+            user_weight=user_weight,
+            active_minutes=frontend_active_minutes,
+        )
+        
+        if calorie_validation.is_rejected:
+            return jsonify({
+                'error': {
+                    'code': 'CALORIE_VALIDATION_REJECTED',
+                    'message': 'One or more calorie values are physiologically impossible and cannot be saved.',
+                    'validation': calorie_validation.to_dict(),
+                }
+            }), 422
+        
+        server_cals = calorie_validation.server_calories
         
         session = LiveWorkoutSession(
             user_id=user_id,
             session_date=datetime.utcnow().date(),
             start_time=start_time,
             end_time=datetime.utcnow(),
-            user_weight=data.get('weight', user.weight if user else 70),
+            user_weight=user_weight,
             
-            squat_calories=data.get('squat_calories', 0),
-            pushup_calories=data.get('pushup_calories', 0),
-            lunge_calories=data.get('lunge_calories', 0),
-            jumping_jack_calories=data.get('jumping_jack_calories', 0),
-            high_knee_calories=data.get('high_knee_calories', 0),
-            burpee_calories=data.get('burpee_calories', 0),
-            plank_calories=data.get('plank_calories', 0),
+            squat_calories=server_cals.get('squat_calories', 0),
+            pushup_calories=server_cals.get('pushup_calories', 0),
+            lunge_calories=server_cals.get('lunge_calories', 0),
+            jumping_jack_calories=server_cals.get('jumping_jack_calories', 0),
+            high_knee_calories=server_cals.get('high_knee_calories', 0),
+            burpee_calories=server_cals.get('burpee_calories', 0),
+            plank_calories=server_cals.get('plank_calories', 0),
 
-            situp_calories=data.get('situp_calories', 0),
-            leg_raise_calories=data.get('leg_raise_calories', 0),
-            bicycle_crunch_calories=data.get('bicycle_crunch_calories', 0),
-            total_calories=data.get('total_calories', 0),
+            situp_calories=server_cals.get('situp_calories', 0),
+            leg_raise_calories=server_cals.get('leg_raise_calories', 0),
+            bicycle_crunch_calories=server_cals.get('bicycle_crunch_calories', 0),
+            total_calories=server_cals.get('total_calories', 0),
             
-            squat_reps=data.get('squat_reps', 0),
-            pushup_reps=data.get('pushup_reps', 0),
-            lunge_reps=data.get('lunge_reps', 0),
-            jumping_jack_reps=data.get('jumping_jack_reps', 0),
-            high_knee_reps=data.get('high_knee_reps', 0),
-            burpee_reps=data.get('burpee_reps', 0),
-            plank_seconds=data.get('plank_seconds', 0),
+            squat_reps=validated_data.get('squat_reps', 0),
+            pushup_reps=validated_data.get('pushup_reps', 0),
+            lunge_reps=validated_data.get('lunge_reps', 0),
+            jumping_jack_reps=validated_data.get('jumping_jack_reps', 0),
+            high_knee_reps=validated_data.get('high_knee_reps', 0),
+            burpee_reps=validated_data.get('burpee_reps', 0),
+            plank_seconds=validated_data.get('plank_seconds', 0),
 
-            situp_reps=data.get('situp_reps', 0),
-            leg_raise_reps=data.get('leg_raise_reps', 0),
-            bicycle_crunch_reps=data.get('bicycle_crunch_reps', 0),
+            situp_reps=validated_data.get('situp_reps', 0),
+            leg_raise_reps=validated_data.get('leg_raise_reps', 0),
+            bicycle_crunch_reps=validated_data.get('bicycle_crunch_reps', 0),
             total_reps=total_reps,
             
-            form_score=data.get('form_score', 0),
-            consistency=data.get('consistency', 0),
-            cadence=data.get('cadence', 0),
+            form_score=validated_data.get('form_score', 0),
+            consistency=validated_data.get('consistency', 0),
+            cadence=validated_data.get('cadence', 0),
             active_minutes=frontend_active_minutes,
             exercises_done=exercises_done
         )
         
         db.session.add(session)
-        
         
         stats = ExerciseStatistics.query.filter_by(user_id=user_id).first()
         
@@ -263,7 +298,6 @@ def save_live_session():
             )
             db.session.add(stats)
         
-        
         stats.total_calories = (stats.total_calories or 0) + session.total_calories
         stats.total_sessions = (stats.total_sessions or 0) + 1
         stats.total_squat_reps = (stats.total_squat_reps or 0) + session.squat_reps
@@ -279,7 +313,6 @@ def save_live_session():
         stats.total_bicycle_crunch_reps = (stats.total_bicycle_crunch_reps or 0) + session.bicycle_crunch_reps
         stats.total_reps = (stats.total_reps or 0) + session.total_reps
         stats.total_active_minutes = (stats.total_active_minutes or 0) + session.active_minutes
-        
         
         if stats.total_sessions > 0:
             stats.avg_calories_per_session = stats.total_calories / stats.total_sessions
@@ -386,7 +419,6 @@ def save_live_session():
             db.session.rollback()
             print(f'Live workout AI suggestion warning: {str(ai_err)}')
         
-        
         try:
             recent_sessions = LiveWorkoutSession.query.filter_by(user_id=user_id)\
                 .order_by(LiveWorkoutSession.created_at.desc()).limit(20).all()
@@ -395,20 +427,28 @@ def save_live_session():
             
             print(f'Alert generation warning: {str(alert_err)}')
         
-        return jsonify({
+        response_data = {
             'message': 'Session saved successfully',
             'session': session.to_dict(),
             'statistics': stats.to_dict(),
             'ai_suggestions': ai_suggestion_row.to_dict() if ai_suggestion_row else None,
             'ai_summary': ai_summary,
-        }), 201
+        }
+        
+        if calorie_validation.issues:
+            response_data['calorie_validation'] = calorie_validation.to_dict()
+        
+        return jsonify(response_data), 201
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': f'Failed to save session: {str(e)}'}), 500
-
-
+        import logging
+        logging.getLogger(__name__).error(
+            'Failed to save live session: %s', str(e), exc_info=True
+        )
+        return jsonify({'message': 'Failed to save session. Please try again later.'}), 500
 
 @workout_bp.route('/sessions', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_live_sessions():
     user_id = int(get_jwt_identity())
@@ -423,13 +463,12 @@ def get_live_sessions():
         'sessions': [s.to_dict() for s in sessions]
     }), 200
 
-
 @workout_bp.route('/realtime-insights', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_realtime_insights():
-    """Get live workout sessions with persisted AI suggestions from database."""
+    
     user_id = int(get_jwt_identity())
-
     limit = request.args.get('limit', 50, type=int)
 
     suggestions = LiveWorkoutSessionSuggestion.query.filter_by(user_id=user_id)\
@@ -440,13 +479,12 @@ def get_realtime_insights():
         'insights': [s.to_dict() for s in suggestions]
     }), 200
 
-
-
 @workout_bp.route('/statistics', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_statistics():
+
     user_id = int(get_jwt_identity())
-    
     stats = ExerciseStatistics.query.filter_by(user_id=user_id).first()
     
     if not stats:
@@ -463,30 +501,26 @@ def get_statistics():
         'statistics': stats.to_dict()
     }), 200
 
-
-
 @workout_bp.route('/trends/calories', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_calorie_trends():
+
     user_id = int(get_jwt_identity())
     days = request.args.get('days', 7, type=int)
-    
     end_date = datetime.utcnow().date()
     start_date = end_date - timedelta(days=days-1)
-    
     
     sessions = LiveWorkoutSession.query.filter(
         LiveWorkoutSession.user_id == user_id,
         LiveWorkoutSession.session_date >= start_date,
         LiveWorkoutSession.session_date <= end_date
-    ).all()
-    
+    ).all()  
     
     daily_calories = {}
     for session in sessions:
         date_str = session.session_date.isoformat()
         daily_calories[date_str] = daily_calories.get(date_str, 0) + session.total_calories
-    
     
     trends = []
     current_date = start_date
@@ -502,9 +536,8 @@ def get_calorie_trends():
         'trends': trends
     }), 200
 
-
-
 @workout_bp.route('/compare', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def compare_sessions():
     user_id = int(get_jwt_identity())
@@ -520,7 +553,6 @@ def compare_sessions():
     except:
         return jsonify({'message': 'Invalid date format. Use YYYY-MM-DD'}), 400
     
-    
     sessions1 = LiveWorkoutSession.query.filter(
         LiveWorkoutSession.user_id == user_id,
         LiveWorkoutSession.session_date == date1_obj
@@ -530,7 +562,6 @@ def compare_sessions():
         LiveWorkoutSession.user_id == user_id,
         LiveWorkoutSession.session_date == date2_obj
     ).all()
-    
     
     def aggregate_sessions(sessions):
         return {
@@ -545,7 +576,6 @@ def compare_sessions():
     
     stats1 = aggregate_sessions(sessions1)
     stats2 = aggregate_sessions(sessions2)
-    
     
     suggestions = []
     
@@ -584,8 +614,8 @@ def compare_sessions():
         'suggestions': suggestions
     }), 200
 
-
 @workout_bp.route('', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_workouts():
     user_id = int(get_jwt_identity())
@@ -604,8 +634,8 @@ def get_workouts():
         'current_page': page
     }), 200
 
-
 @workout_bp.route('/<int:workout_id>', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_workout(workout_id):
     user_id = int(get_jwt_identity())
@@ -616,8 +646,8 @@ def get_workout(workout_id):
     
     return jsonify({'workout': workout.to_dict()}), 200
 
-
 @workout_bp.route('/<int:workout_id>', methods=['DELETE'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
 def delete_workout(workout_id):
     user_id = int(get_jwt_identity())
@@ -628,40 +658,35 @@ def delete_workout(workout_id):
     
     db.session.delete(workout)
     db.session.commit()
-    
     return jsonify({'message': 'Workout deleted'}), 200
 
-
 @workout_bp.route('/<int:workout_id>/frames', methods=['POST'])
+@limiter.limit("120 per minute")
 @jwt_required()
-def add_motion_frame(workout_id):
+@validate_with(MotionFrameSchema)
+def add_motion_frame(workout_id, validated_data):
     user_id = int(get_jwt_identity())
     workout = Workout.query.filter_by(id=workout_id, user_id=user_id).first()
     
     if not workout:
         return jsonify({'message': 'Workout not found'}), 404
     
-    data = request.get_json()
-    
     frame = MotionFrame(
         workout_id=workout_id,
-        frame_number=data.get('frame_number'),
-        landmarks=data.get('landmarks'),
-        joint_angles=data.get('joint_angles'),
-        velocity=data.get('velocity')
+        frame_number=validated_data.get('frame_number'),
+        landmarks=validated_data.get('landmarks'),
+        joint_angles=validated_data.get('joint_angles'),
+        velocity=validated_data.get('velocity')
     )
     
     db.session.add(frame)
     db.session.commit()
-    
     return jsonify({'frame': frame.to_dict()}), 201
 
 
 def _generate_session_alerts(user_id, latest_session, recent_sessions):
-    """Generate alerts based on workout session data and save to database."""
     
     def _create_alert_if_new(alert_type, severity, message, suggestion):
-        """Create alert only if a similar one doesn't already exist."""
         existing = Alert.query.filter_by(
             user_id=user_id,
             alert_type=alert_type,
@@ -684,7 +709,6 @@ def _generate_session_alerts(user_id, latest_session, recent_sessions):
     
     alerts_created = []
     
-    
     if latest_session.form_score < 60:
         alert = _create_alert_if_new(
             'injury_risk', 'critical',
@@ -693,7 +717,6 @@ def _generate_session_alerts(user_id, latest_session, recent_sessions):
         )
         if alert:
             alerts_created.append(alert)
-    
     
     if len(recent_sessions) > 1:
         max_calories = max(s.total_calories for s in recent_sessions)
@@ -704,8 +727,7 @@ def _generate_session_alerts(user_id, latest_session, recent_sessions):
                 'Celebrate and maintain this momentum! Share your achievement!'
             )
             if alert:
-                alerts_created.append(alert)
-    
+                alerts_created.append(alert)   
     
     if latest_session.active_minutes < 10 and latest_session.active_minutes > 0:
         alert = _create_alert_if_new(
@@ -715,7 +737,6 @@ def _generate_session_alerts(user_id, latest_session, recent_sessions):
         )
         if alert:
             alerts_created.append(alert)
-    
     
     if len(recent_sessions) >= 5:
         session_dates = set()
@@ -731,7 +752,6 @@ def _generate_session_alerts(user_id, latest_session, recent_sessions):
             if alert:
                 alerts_created.append(alert)
     
-    
     if len(recent_sessions) >= 3:
         form_scores = [s.form_score for s in recent_sessions[:3]]
         form_trend = form_scores[0] - form_scores[2]
@@ -743,7 +763,6 @@ def _generate_session_alerts(user_id, latest_session, recent_sessions):
             )
             if alert:
                 alerts_created.append(alert)
-    
     
     if len(recent_sessions) > 1:
         max_reps = max(s.total_reps for s in recent_sessions)

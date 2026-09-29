@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app import db
 from app.models import Alert, LiveWorkoutSession
+from app.rate_limiter import limiter, RATE_LIMIT_READ, RATE_LIMIT_WRITE
+from app.schemas import validate_with
+from app.schemas.alerts import CreateAlertSchema, SyncAlertsSchema
 
 alerts_bp = Blueprint('alerts', __name__)
 
@@ -14,7 +17,6 @@ def _get_latest_session_id(user_id: int) -> int:
     latest_session = LiveWorkoutSession.query.filter_by(user_id=user_id)\
         .order_by(LiveWorkoutSession.id.desc()).first()
     return latest_session.id if latest_session else 0
-
 
 def _create_suppression_marker(user_id: int, alert_type: str, message: str) -> None:
     latest_session_id = _get_latest_session_id(user_id)
@@ -29,7 +31,6 @@ def _create_suppression_marker(user_id: int, alert_type: str, message: str) -> N
     )
     db.session.add(marker)
 
-
 def _create_clear_marker(user_id: int) -> None:
     latest_session_id = _get_latest_session_id(user_id)
     marker = Alert(
@@ -43,7 +44,6 @@ def _create_clear_marker(user_id: int) -> None:
     )
     db.session.add(marker)
 
-
 def _parse_suppression_marker(raw_message: str):
     parts = (raw_message or '').split('||', 2)
     if len(parts) != 3:
@@ -55,6 +55,7 @@ def _parse_suppression_marker(raw_message: str):
     return session_id, parts[1], parts[2]
 
 @alerts_bp.route('', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_alerts():
     user_id = int(get_jwt_identity())
@@ -85,8 +86,8 @@ def get_alerts():
         'current_page': page
     }), 200
 
-
 @alerts_bp.route('/<int:alert_id>/read', methods=['PUT'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
 def mark_as_read(alert_id):
     user_id = int(get_jwt_identity())
@@ -100,8 +101,8 @@ def mark_as_read(alert_id):
     
     return jsonify({'alert': alert.to_dict()}), 200
 
-
 @alerts_bp.route('/unread-count', methods=['GET'])
+@limiter.limit("120 per minute")
 @jwt_required()
 def get_unread_count():
     user_id = int(get_jwt_identity())
@@ -113,11 +114,11 @@ def get_unread_count():
     
     return jsonify({'unread_count': count}), 200
 
-
 @alerts_bp.route('/total-count', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_total_count():
-    """Get total alerts count for user (read + unread)"""
+
     user_id = int(get_jwt_identity())
     total = Alert.query.filter(
         Alert.user_id == user_id,
@@ -131,8 +132,8 @@ def get_total_count():
     
     return jsonify({'total_count': total, 'unread_count': unread}), 200
 
-
 @alerts_bp.route('/<int:alert_id>', methods=['DELETE'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
 def delete_alert(alert_id):
     user_id = int(get_jwt_identity())
@@ -151,37 +152,36 @@ def delete_alert(alert_id):
     
     return jsonify({'message': 'Alert deleted'}), 200
 
-
 @alerts_bp.route('', methods=['POST'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
-def create_alert():
-    """Create a new alert for the user"""
+@validate_with(CreateAlertSchema)
+def create_alert(validated_data):
+    
     user_id = int(get_jwt_identity())
-    data = request.get_json()
     
     alert = Alert(
         user_id=user_id,
-        alert_type=data.get('alert_type', 'info'),
-        severity=data.get('severity', 'info'),
-        message=data.get('message', ''),
-        suggestion=data.get('suggestion', ''),
-        is_read=data.get('is_read', False),
+        alert_type=validated_data.get('alert_type', 'info'),
+        severity=validated_data.get('severity', 'info'),
+        message=validated_data.get('message', ''),
+        suggestion=validated_data.get('suggestion', ''),
+        is_read=validated_data.get('is_read', False),
         owner_notified=False
     )
     
     db.session.add(alert)
     db.session.commit()
-    
     return jsonify({'alert': alert.to_dict()}), 201
 
-
 @alerts_bp.route('/sync', methods=['POST'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
-def sync_alerts():
-    """Sync multiple alerts from frontend - creates new ones if they don't exist"""
+@validate_with(SyncAlertsSchema)
+def sync_alerts(validated_data):
+
     user_id = int(get_jwt_identity())
-    data = request.get_json()
-    alerts_data = data.get('alerts', [])
+    alerts_data = validated_data.get('alerts', [])
     
     created_alerts = []
     latest_session_id = _get_latest_session_id(user_id)
@@ -226,7 +226,6 @@ def sync_alerts():
         if (alert_type, alert_message) in suppressed_signatures:
             continue
 
-        
         existing = Alert.query.filter(
             Alert.user_id == user_id,
             Alert.alert_type == alert_type,
@@ -254,8 +253,8 @@ def sync_alerts():
         'alerts': [a.to_dict() for a in created_alerts]
     }), 201
 
-
 @alerts_bp.route('/all', methods=['DELETE'])
+@limiter.limit(RATE_LIMIT_WRITE)
 @jwt_required()
 def clear_all_alerts():
     """Delete all visible alerts and suppress regeneration until a new workout is saved."""
@@ -268,5 +267,4 @@ def clear_all_alerts():
 
     _create_clear_marker(user_id)
     db.session.commit()
-
     return jsonify({'message': 'All alerts cleared', 'deleted_count': deleted_count}), 200

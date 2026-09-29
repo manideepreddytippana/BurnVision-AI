@@ -1,23 +1,21 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.services.motion_analysis import MotionAnalysisService
+from app.rate_limiter import limiter, RATE_LIMIT_COMPUTE
+from app.schemas import validate_with
+from app.schemas.motion import AnalyzeLandmarksSchema, FormFeedbackSchema, CalorieMappingSchema
 
 motion_bp = Blueprint('motion', __name__)
 
 motion_service = MotionAnalysisService()
 
 @motion_bp.route('/analyze', methods=['POST'])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def analyze_landmarks():
-    """Analyze pose landmarks and return metrics"""
-    data = request.get_json()
-    
-    landmarks = data.get('landmarks', [])
-    if not landmarks:
-        return jsonify({'message': 'No landmarks provided'}), 400
-    
-    
-    analysis = motion_service.analyze_pose(landmarks)
+@validate_with(AnalyzeLandmarksSchema)
+def analyze_landmarks(validated_data):
+
+    analysis = motion_service.analyze_pose(validated_data['landmarks'])
     
     return jsonify({
         'joint_angles': analysis['joint_angles'],
@@ -26,21 +24,15 @@ def analyze_landmarks():
         'detected_exercise': analysis['detected_exercise']
     }), 200
 
-
 @motion_bp.route('/form-feedback', methods=['POST'])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def get_form_feedback():
-    """Get real-time form feedback based on landmarks"""
-    data = request.get_json()
-    
-    landmarks = data.get('landmarks', [])
-    exercise_type = data.get('exercise_type', 'general')
-    
-    if not landmarks:
-        return jsonify({'message': 'No landmarks provided'}), 400
-    
-    
-    feedback = motion_service.get_form_feedback(landmarks, exercise_type)
+@validate_with(FormFeedbackSchema)
+def get_form_feedback(validated_data):
+
+    feedback = motion_service.get_form_feedback(
+        validated_data['landmarks'], validated_data.get('exercise_type', 'general')
+    )
     
     return jsonify({
         'feedback': feedback['messages'],
@@ -48,25 +40,16 @@ def get_form_feedback():
         'corrections': feedback['corrections']
     }), 200
 
-
 @motion_bp.route('/calorie-mapping', methods=['POST'])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def calculate_calorie_burn():
-    """Calculate calorie burn from motion sequence"""
-    data = request.get_json()
-    
-    motion_sequence = data.get('sequence', [])
-    user_weight = data.get('weight', 70)
-    duration = data.get('duration', 0)  
-    
-    if not motion_sequence:
-        return jsonify({'message': 'No motion sequence provided'}), 400
-    
-    
+@validate_with(CalorieMappingSchema)
+def calculate_calorie_burn(validated_data):
+
     result = motion_service.calculate_calories(
-        motion_sequence, 
-        user_weight, 
-        duration
+        validated_data['sequence'],
+        validated_data.get('weight', 70),
+        validated_data.get('duration', 0)
     )
     
     return jsonify({

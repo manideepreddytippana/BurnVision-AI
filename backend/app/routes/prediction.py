@@ -4,6 +4,9 @@ from app import db
 from app.models import Prediction, Workout, User
 from app.services.calorie_predictor import CaloriePredictor
 from app.services.xai_service import XAIService
+from app.rate_limiter import limiter, RATE_LIMIT_COMPUTE, RATE_LIMIT_READ
+from app.schemas import validate_with
+from app.schemas.prediction import MakePredictionSchema
 
 prediction_bp = Blueprint('prediction', __name__)
 
@@ -11,19 +14,18 @@ predictor = CaloriePredictor()
 xai_service = XAIService()
 
 @prediction_bp.route('', methods=['POST'])
+@limiter.limit(RATE_LIMIT_COMPUTE)
 @jwt_required()
-def make_prediction():
+@validate_with(MakePredictionSchema)
+def make_prediction(validated_data):
     user_id = int(get_jwt_identity())
     user = User.query.get(user_id)
-    data = request.get_json()
     
     if not user:
         return jsonify({'message': 'User not found'}), 404
     
-    
-    workout_id = data.get('workout_id')
+    workout_id = validated_data.get('workout_id')
     workout = Workout.query.get(workout_id) if workout_id else None
-    
     
     features = {
         'weight': user.weight or 70,
@@ -31,20 +33,15 @@ def make_prediction():
         'age': user.age or 30,
         'gender': user.gender or 'other',
         'fitness_level': user.fitness_level or 'intermediate',
-        'duration': data.get('duration', 0),
-        'heart_rate': data.get('heart_rate', 100),
-        'movement_speed': data.get('movement_speed', 1.0),
-        'form_quality': data.get('form_quality', 80),
-        'exercise_type': data.get('exercise_type', 'general'),
-        'context_multiplier': data.get('context_multiplier', 1.0)
+        'duration': validated_data.get('duration', 0),
+        'heart_rate': validated_data.get('heart_rate', 100),
+        'movement_speed': validated_data.get('movement_speed', 1.0),
+        'form_quality': validated_data.get('form_quality', 80),
+        'exercise_type': validated_data.get('exercise_type', 'general'),
+        'context_multiplier': validated_data.get('context_multiplier', 1.0)
     }
-    
-    
     prediction_result = predictor.predict(features)
-    
-    
     explanation = xai_service.generate_explanation(features, prediction_result)
-    
     
     prediction = Prediction(
         workout_id=workout_id,
@@ -57,14 +54,13 @@ def make_prediction():
     
     db.session.add(prediction)
     db.session.commit()
-    
     return jsonify({
         'prediction': prediction.to_dict(),
         'explanation': explanation
     }), 200
 
-
 @prediction_bp.route('/<int:prediction_id>/explanation', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ) 
 @jwt_required()
 def get_explanation(prediction_id):
     user_id = int(get_jwt_identity())
@@ -81,8 +77,8 @@ def get_explanation(prediction_id):
         }
     }), 200
 
-
 @prediction_bp.route('/history', methods=['GET'])
+@limiter.limit(RATE_LIMIT_READ)
 @jwt_required()
 def get_prediction_history():
     user_id = int(get_jwt_identity())
