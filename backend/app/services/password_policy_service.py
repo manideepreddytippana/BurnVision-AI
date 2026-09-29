@@ -52,7 +52,24 @@ class PasswordValidationResult:
         }
 
 class PasswordPolicyService:
+    def __init__(self):
+        self.min_length = 8
+        self.max_length = 128
+        self.require_uppercase = True
+        self.require_lowercase = True
+        self.require_digit = True
+        self.require_special = True
+        self.max_consecutive_identical = 3
+        self.check_common_passwords = True
+        self.check_user_context = True
+        self._keyboard_sequences = [
+            'qwertyuiop', 'asdfghjkl', 'zxcvbnm',
+            '1234567890', '0987654321'
+        ]
 
+    def validate_password(
+        self, password: str, email: Optional[str] = None, name: Optional[str] = None
+    ) -> PasswordValidationResult:
         result = PasswordValidationResult()
 
         if not password:
