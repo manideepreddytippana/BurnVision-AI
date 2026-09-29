@@ -5,8 +5,7 @@ from flask_jwt_extended import create_access_token, decode_token
 
 @pytest.fixture
 def app():
-    app = create_app()
-    app.config.update({
+    app = create_app({
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "RATE_LIMIT_ENABLED": False
