@@ -31,19 +31,21 @@ def create_app():
     )
     app.config['SARVAM_API_KEY'] = os.getenv('SARVAM_API_KEY')
     app.config['SARVAM_AI_MODEL'] = os.getenv('SARVAM_AI_MODEL')
-    app.config['SARVAM_AI_TIMEOUT'] = int(os.getenv('SARVAM_AI_TIMEOUT'))
+    app.config['SARVAM_AI_TIMEOUT'] = int(os.getenv('SARVAM_AI_TIMEOUT', '200'))
+    
+    # Enforce request size limits to prevent DoS via large payloads (default 1MB)
+    max_mb = int(os.getenv('MAX_CONTENT_LENGTH_MB', '1'))
+    app.config['MAX_CONTENT_LENGTH'] = max_mb * 1024 * 1024
 
     if not app.config.get('SECRET_KEY'):
         raise ValueError("No SECRET_KEY set for Flask application")
     if not app.config.get('JWT_SECRET_KEY'):
         raise ValueError("No JWT_SECRET_KEY set for Flask application")
 
-    
     db.init_app(app)
     migrate.init_app(app, db)
 
     jwt.init_app(app)
-    
         
     allowed_origins = [
         "http://localhost:3000", "http://localhost:3001",
@@ -65,22 +67,37 @@ def create_app():
             "supports_credentials": True
         }
     })
-
     
     
     @jwt.invalid_token_loader
     def invalid_token_callback(error_string):
-        return {'message': f'Invalid token: {error_string}'}, 422
+        return {'message': 'The provided token is invalid.'}, 422
     
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
-        return {'message': 'Token has expired'}, 401
+        return {'message': 'Token has expired.'}, 401
     
     @jwt.unauthorized_loader
     def missing_token_callback(error_string):
-        return {'message': f'Missing token: {error_string}'}, 401
+        return {'message': 'Authentication token is required.'}, 401
     
+    @jwt.token_in_blocklist_loader
+    def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
+        from app.models import TokenBlocklist
+        jti = jwt_payload["jti"]
+        token = db.session.query(TokenBlocklist.id).filter_by(jti=jti).scalar()
+        return token is not None
     
+    @jwt.revoked_token_loader
+    def revoked_token_callback(jwt_header, jwt_payload):
+        return {'message': 'The token has been revoked'}, 401
+
+    from app.middleware.security_headers import init_security_headers
+    init_security_headers(app)
+
+    from app.middleware.error_handlers import init_error_handlers
+    init_error_handlers(app)
+
     from app.routes.auth import auth_bp
     from app.routes.profile import profile_bp
     from app.routes.workout import workout_bp
@@ -108,7 +125,12 @@ def create_app():
     app.register_blueprint(calorie_predict_bp, url_prefix='/api/calorie-predict')
     app.register_blueprint(advanced_calorie_predict_bp, url_prefix='/api/advanced-calorie-predict')
     app.register_blueprint(ai_bp, url_prefix='/api/ai')
+
+    from app.rate_limiter import init_rate_limiter, limiter
+    init_rate_limiter(app)
+
     @app.route('/api/health')
+    @limiter.exempt
     def health_check():
         return {'status': 'healthy', 'version': '1.0.0'}
     

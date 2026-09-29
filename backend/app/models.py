@@ -2,6 +2,13 @@ from app import db
 from datetime import datetime
 import bcrypt
 
+class TokenBlocklist(db.Model):
+    __tablename__ = 'token_blocklist'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    jti = db.Column(db.String(36), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
 class User(db.Model):
     __tablename__ = 'users'
     
@@ -19,6 +26,9 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
+    failed_login_count = db.Column(db.Integer, default=0, nullable=False)
+    locked_until = db.Column(db.DateTime, nullable=True)
+    last_failed_login = db.Column(db.DateTime, nullable=True)
     
     workouts = db.relationship('Workout', backref='user', lazy='dynamic')
     alerts = db.relationship('Alert', backref='user', lazy='dynamic')
@@ -57,7 +67,6 @@ class User(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
-
 class Room(db.Model):
     __tablename__ = 'rooms'
     
@@ -88,7 +97,6 @@ class Room(db.Model):
             'current_participants': self.workouts.filter_by(end_time=None).count()
         }
 
-
 class Workout(db.Model):
     __tablename__ = 'workouts'
     
@@ -102,7 +110,6 @@ class Workout(db.Model):
     environment = db.Column(db.String(50))  
     context_factors = db.Column(db.JSON)  
     exercise_type = db.Column(db.String(100))
-    
     
     motion_frames = db.relationship('MotionFrame', backref='workout', lazy='dynamic')
     predictions = db.relationship('Prediction', backref='workout', lazy='dynamic')
@@ -122,8 +129,6 @@ class Workout(db.Model):
             'duration': (self.end_time - self.start_time).total_seconds() if self.end_time and self.start_time else None
         }
 
-
-
 class LiveWorkoutSession(db.Model):
     __tablename__ = 'live_workout_sessions'
     
@@ -134,10 +139,8 @@ class LiveWorkoutSession(db.Model):
     end_time = db.Column(db.DateTime)
     user_weight = db.Column(db.Float)  
     
-    
     squat_calories = db.Column(db.Float, default=0)
     pushup_calories = db.Column(db.Float, default=0)
-    
     
     lunge_calories = db.Column(db.Float, default=0)
     jumping_jack_calories = db.Column(db.Float, default=0)
@@ -151,10 +154,8 @@ class LiveWorkoutSession(db.Model):
     
     total_calories = db.Column(db.Float, default=0)
     
-    
     squat_reps = db.Column(db.Integer, default=0)
     pushup_reps = db.Column(db.Integer, default=0)
-    
     
     lunge_reps = db.Column(db.Integer, default=0)
     jumping_jack_reps = db.Column(db.Integer, default=0)
@@ -168,12 +169,10 @@ class LiveWorkoutSession(db.Model):
     
     total_reps = db.Column(db.Integer, default=0)
     
-    
     form_score = db.Column(db.Float, default=0)
     consistency = db.Column(db.Float, default=0)
     cadence = db.Column(db.Float, default=0)
     active_minutes = db.Column(db.Float, default=0)
-    
     
     exercises_done = db.Column(db.String(100))  
     
@@ -227,19 +226,15 @@ class LiveWorkoutSession(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None,
         }
 
-
 class LiveWorkoutSessionSuggestion(db.Model):
-    """Stores AI suggestions for realtime camera workout sessions."""
     __tablename__ = 'live_workout_sessions_suggestions'
 
     id = db.Column(db.Integer, primary_key=True)
     live_workout_session_id = db.Column(db.Integer, db.ForeignKey('live_workout_sessions.id'), nullable=False, unique=True, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
 
-    
     calorie_prediction_explanation_id = db.Column(db.Integer, db.ForeignKey('calorie_predictions_explanations.id'), nullable=True, index=True)
 
-    
     session_data = db.Column(db.JSON, nullable=False)
     ai_suggestions = db.Column(db.JSON, nullable=False)
     summary_points = db.Column(db.JSON, nullable=True)
@@ -263,15 +258,12 @@ class LiveWorkoutSessionSuggestion(db.Model):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None,
         }
 
-
-
 class ExerciseStatistics(db.Model):
     __tablename__ = 'exercise_statistics'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
     user_name = db.Column(db.String(255))  
-    
     
     total_calories = db.Column(db.Float, default=0)
     total_sessions = db.Column(db.Integer, default=0)
@@ -288,7 +280,6 @@ class ExerciseStatistics(db.Model):
     total_bicycle_crunch_reps = db.Column(db.Integer, default=0)
     total_reps = db.Column(db.Integer, default=0)
     total_active_minutes = db.Column(db.Float, default=0)
-    
     
     avg_form_score = db.Column(db.Float, default=0)
     avg_calories_per_session = db.Column(db.Float, default=0)
@@ -320,7 +311,6 @@ class ExerciseStatistics(db.Model):
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
 
-
 class MotionFrame(db.Model):
     __tablename__ = 'motion_frames'
     
@@ -341,7 +331,6 @@ class MotionFrame(db.Model):
             'velocity': self.velocity,
             'timestamp': self.timestamp.isoformat() if self.timestamp else None
         }
-
 
 class Prediction(db.Model):
     __tablename__ = 'predictions'
@@ -366,7 +355,6 @@ class Prediction(db.Model):
             'explanation': self.explanation,
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
-
 
 class Alert(db.Model):
     __tablename__ = 'alerts'
@@ -394,9 +382,7 @@ class Alert(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
-
 class CaloriePrediction(db.Model):
-    """Stores calorie prediction history for ML-based predictions"""
     __tablename__ = 'calorie_predictions'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -411,7 +397,6 @@ class CaloriePrediction(db.Model):
     heart_rate = db.Column(db.Float)  
     body_temp = db.Column(db.Float)  
     
-    
     predicted_calories = db.Column(db.Float)
     confidence_score = db.Column(db.Float)
     
@@ -419,14 +404,11 @@ class CaloriePrediction(db.Model):
     model_type = db.Column(db.String(50))  
     train_split = db.Column(db.Float)  
     
-    
     derived_metrics = db.Column(db.JSON)
-    
     
     recommendation = db.Column(db.Text, nullable=True)
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
     
     user = db.relationship('User', backref=db.backref('calorie_predictions', lazy='dynamic'))
     
@@ -450,21 +432,14 @@ class CaloriePrediction(db.Model):
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 
-
 class CaloriePredictionExplanation(db.Model):
-    """Stores persisted Sarvam insights paired with main prediction data."""
     __tablename__ = 'calorie_predictions_explanations'
 
     id = db.Column(db.Integer, primary_key=True)
     prediction_id = db.Column(db.Integer, db.ForeignKey('calorie_predictions.id'), nullable=False, unique=True, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
-
-    
     main_prediction_data = db.Column(db.JSON, nullable=False)
-
-    
     ai_insights = db.Column(db.JSON, nullable=False)
-
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -484,54 +459,32 @@ class CaloriePredictionExplanation(db.Model):
 
 
 class AdvancedCaloriePrediction(db.Model):
-    """Stores advanced calorie prediction history with comprehensive workout features"""
     __tablename__ = 'advanced_calorie_predictions'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    
-    
+
     gender = db.Column(db.String(20))
     age = db.Column(db.Integer)
     weight = db.Column(db.Float)  
     height = db.Column(db.Float)  
-    
-    
     resting_heart_rate = db.Column(db.Float)  
-    avg_heart_rate = db.Column(db.Float)  
-    
-    
     workout_type = db.Column(db.String(50))  
     exercise_name = db.Column(db.String(100))
     session_duration = db.Column(db.Float)  
     sets = db.Column(db.Float)
     reps = db.Column(db.Float)
     difficulty_level = db.Column(db.String(50))  
-    
-    
     experience_level = db.Column(db.Float)  
-    
-    
     water_intake = db.Column(db.Float)  
     workout_frequency = db.Column(db.Float)  
-    
-    
     predicted_calories = db.Column(db.Float)
     confidence_score = db.Column(db.Float)
-    
-    
     model_type = db.Column(db.String(50))
     train_split = db.Column(db.Float)
-    
-    
     derived_metrics = db.Column(db.JSON)
-    
-    
     recommendation = db.Column(db.Text, nullable=True)
-    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    
     user = db.relationship('User', backref=db.backref('advanced_calorie_predictions', lazy='dynamic'))
     
     def to_dict(self):
@@ -565,19 +518,13 @@ class AdvancedCaloriePrediction(db.Model):
 
 
 class AdvancedCaloriePredictionExplanation(db.Model):
-    """Stores persisted Sarvam insights paired with advanced prediction data."""
     __tablename__ = 'advanced_calorie_predictions_explanations'
 
     id = db.Column(db.Integer, primary_key=True)
     prediction_id = db.Column(db.Integer, db.ForeignKey('advanced_calorie_predictions.id'), nullable=False, unique=True, index=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
-
-    
     main_prediction_data = db.Column(db.JSON, nullable=False)
-
-    
     ai_insights = db.Column(db.JSON, nullable=False)
-
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
