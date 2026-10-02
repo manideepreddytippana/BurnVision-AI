@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import { ThemeProvider } from './contexts/ThemeContext'
 import { ToastProvider } from './components/ui/toast'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
@@ -22,8 +23,9 @@ import { LoadingBar } from './components/ui/LoadingBar'
 
 function App(): JSX.Element {
     return (
-        <AuthProvider>
-            <ToastProvider>
+        <ThemeProvider defaultTheme="dark">
+            <AuthProvider>
+                <ToastProvider>
                 <Router>
                     <PageTitle />
                     <LoadingBar />
@@ -51,8 +53,9 @@ function App(): JSX.Element {
                         </Route>
                     </Routes>
                 </Router>
-            </ToastProvider>
-        </AuthProvider>
+                </ToastProvider>
+            </AuthProvider>
+        </ThemeProvider>
     )
 }
 
