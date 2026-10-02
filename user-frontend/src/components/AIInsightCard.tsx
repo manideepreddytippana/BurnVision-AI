@@ -16,7 +16,7 @@ export default function AIInsightCard({
     accentClass = 'text-primary'
 }: AIInsightCardProps): JSX.Element {
     return (
-        <Card className="glass-card border-white/10 backdrop-blur-xl h-full">
+        <Card className="glass-card border-foreground/10 backdrop-blur-xl h-full">
             <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                     <Icon className={`w-4 h-4 ${accentClass}`} />

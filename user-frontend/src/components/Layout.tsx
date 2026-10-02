@@ -13,7 +13,6 @@ import {
     LogOut,
     Menu,
     X,
-    Flame,
     Calculator,
     History,
     Brain,
@@ -23,6 +22,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import api from '../services/api'
 import LogoutModal from './LogoutModal'
+import { ThemeToggle } from './ui/ThemeToggle'
 
 interface NavItem {
     path: string;
@@ -171,7 +171,7 @@ export default function Layout(): JSX.Element {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+                        className="fixed inset-0 bg-background/80 z-40 lg:hidden"
                         onClick={() => setSidebarOpen(false)}
                     />
                 )}
@@ -179,15 +179,24 @@ export default function Layout(): JSX.Element {
 
             <aside className={`fixed top-0 left-0 z-50 h-screen w-64 bg-card border-r border-border transform transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
                 <div className="flex flex-col h-full">
-                    <div className="p-6 border-b border-border">
-                        <div className="flex items-center gap-3 cursor-pointer " onClick={() => navigate("/")}>
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
-                                <Flame className="w-6 h-6 text-white" />
-                            </div>
-                            <div style={{ cursor: "pointer" }}>
-                                <h1 className="text-xl font-bold gradient-text">BurnVision</h1>
-                                <p className="text-xs text-muted-foreground">Smart Fitness</p>
-                            </div>
+                    <div className="p-5 sm:p-6 border-b border-border">
+                        <div 
+                            className="flex items-center gap-2.5 cursor-pointer select-none transition-transform duration-200 hover:scale-[1.02] active:scale-95" 
+                            onClick={() => navigate("/")}
+                        >
+                            <img
+                                src="/grey_logo.png"
+                                alt="BurnVision Logo"
+                                className="h-9 w-auto object-contain block dark:hidden shrink-0"
+                            />
+                            <img
+                                src="/light_logo.png"
+                                alt="BurnVision Logo"
+                                className="h-9 w-auto object-contain hidden dark:block shrink-0"
+                            />
+                            <span className="text-xl font-bold tracking-tight text-[#0a2540] dark:text-white font-heading">
+                                BurnVision
+                            </span>
                         </div>
                     </div>
 
@@ -219,7 +228,7 @@ export default function Layout(): JSX.Element {
                         </div>
                         <Button
                             variant="outline"
-                            className="gap-2 border-white/20 hover:bg-red-500 hover:border-red-500 hover:text-white transition-colors group"
+                            className="gap-2 border-foreground/20 hover:bg-red-500 hover:border-red-500 hover:text-white transition-colors group"
                             onClick={handleLogout}
                         >
                             <LogOut className="w-4 h-4 group-hover:text-white" />
@@ -240,9 +249,30 @@ export default function Layout(): JSX.Element {
                         {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
                     </Button>
 
+                    {/* Mobile Brand Logo */}
+                    <div 
+                        className="flex items-center gap-2 lg:hidden cursor-pointer select-none" 
+                        onClick={() => navigate('/')}
+                    >
+                        <img
+                            src="/grey_logo.png"
+                            alt="BurnVision"
+                            className="h-7 w-auto object-contain block dark:hidden shrink-0"
+                        />
+                        <img
+                            src="/light_logo.png"
+                            alt="BurnVision"
+                            className="h-7 w-auto object-contain hidden dark:block shrink-0"
+                        />
+                        <span className="text-lg font-bold tracking-tight text-[#0a2540] dark:text-white font-heading">
+                            BurnVision
+                        </span>
+                    </div>
+
                     <div className="flex-1" />
 
                     <div className="flex items-center gap-4">
+                        <ThemeToggle />
                         <Button variant="ghost" size="icon" className="relative group hover:bg-primary hover:text-primary transition " onClick={() => navigate('/alerts')}>
                             <Bell className="w-5 h-5 group-hover:text-white" />
                             {unreadAlerts > 0 && (
