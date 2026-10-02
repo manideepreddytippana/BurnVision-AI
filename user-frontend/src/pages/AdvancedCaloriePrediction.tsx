@@ -465,7 +465,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                         transition={{ delay: 0.1 }}
                         className="lg:col-span-1"
                     >
-                        <Card className="glass-card border-white/10 backdrop-blur-xl">
+                        <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Calculator className="w-5 h-5 text-pink-500" />
@@ -488,7 +488,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         <Button
                                             type="button"
                                             variant={gender === 'Male' ? 'default' : 'outline'}
-                                            className={`flex-1 ${gender === 'Male' ? 'text-white hover:text-white' : 'hover:text-black'}`}
+                                            className={`flex-1 ${gender === 'Male' ? 'text-white hover:text-white' : 'hover:text-foreground'}`}
                                             onClick={() => setGender('Male')}
                                         >
                                             Male
@@ -496,7 +496,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         <Button
                                             type="button"
                                             variant={gender === 'Female' ? 'default' : 'outline'}
-                                            className={`flex-1 ${gender === 'Female' ? 'text-white hover:text-white' : 'hover:text-black'}`}
+                                            className={`flex-1 ${gender === 'Female' ? 'text-white hover:text-white' : 'hover:text-foreground'}`}
                                             onClick={() => setGender('Female')}
                                         >
                                             Female
@@ -560,7 +560,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                 </div>
 
                                 {/* ===== FITNESS DATA ===== */}
-                                <div className="space-y-1 pt-3 border-t border-white/10">
+                                <div className="space-y-1 pt-3 border-t border-foreground/10">
                                     <h3 className="text-sm font-semibold text-red-400 flex items-center gap-2">
                                         <Heart className="w-4 h-4" /> Fitness Data
                                     </h3>
@@ -603,7 +603,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                 </div>
 
                                 {/* ===== WORKOUT DETAILS ===== */}
-                                <div className="space-y-1 pt-3 border-t border-white/10">
+                                <div className="space-y-1 pt-3 border-t border-foreground/10">
                                     <h3 className="text-sm font-semibold text-amber-400 flex items-center gap-2">
                                         <Dumbbell className="w-4 h-4" /> Workout Details
                                     </h3>
@@ -618,7 +618,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         title="Workout Type"
                                         value={workoutType}
                                         onChange={(e) => setWorkoutType(e.target.value)}
-                                        className="w-full h-10 px-3 rounded-lg bg-background border border-white/10 text-foreground"
+                                        className="w-full h-10 px-3 rounded-lg bg-background border border-foreground/10 text-foreground"
                                     >
                                         {WORKOUT_TYPES.map(type => (
                                             <option key={type} value={type}>{type}</option>
@@ -635,7 +635,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         title="Exercise Name"
                                         value={exerciseName}
                                         onChange={(e) => setExerciseName(e.target.value)}
-                                        className="w-full h-10 px-3 rounded-lg bg-background border border-white/10 text-foreground"
+                                        className="w-full h-10 px-3 rounded-lg bg-background border border-foreground/10 text-foreground"
                                     >
                                         {exerciseNames.map(name => (
                                             <option key={name} value={name}>{name}</option>
@@ -706,7 +706,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         title="Difficulty Level"
                                         value={difficultyLevel}
                                         onChange={(e) => setDifficultyLevel(e.target.value)}
-                                        className="w-full h-10 px-3 rounded-lg bg-background border border-white/10 text-foreground"
+                                        className="w-full h-10 px-3 rounded-lg bg-background border border-foreground/10 text-foreground"
                                     >
                                         {DIFFICULTY_LEVELS.map(level => (
                                             <option key={level} value={level}>{level}</option>
@@ -715,7 +715,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                 </div>
 
                                 {/* ===== EXPERIENCE ===== */}
-                                <div className="space-y-1 pt-3 border-t border-white/10">
+                                <div className="space-y-1 pt-3 border-t border-foreground/10">
                                     <h3 className="text-sm font-semibold text-purple-400 flex items-center gap-2">
                                         <Star className="w-4 h-4" /> Experience
                                     </h3>
@@ -729,7 +729,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         title="Experience Level"
                                         value={experienceLevel}
                                         onChange={(e) => setExperienceLevel(e.target.value)}
-                                        className="w-full h-10 px-3 rounded-lg bg-background border border-white/10 text-foreground"
+                                        className="w-full h-10 px-3 rounded-lg bg-background border border-foreground/10 text-foreground"
                                     >
                                         {EXPERIENCE_LEVELS.map(level => (
                                             <option key={level.value} value={level.value}>{level.label}</option>
@@ -738,7 +738,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                 </div>
 
                                 {/* ===== LIFESTYLE ===== */}
-                                <div className="space-y-1 pt-3 border-t border-white/10">
+                                <div className="space-y-1 pt-3 border-t border-foreground/10">
                                     <h3 className="text-sm font-semibold text-cyan-400 flex items-center gap-2">
                                         <Droplets className="w-4 h-4" /> Lifestyle
                                     </h3>
@@ -782,7 +782,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                 </div>
 
                                 {/* ===== ML MODEL ===== */}
-                                <div className="space-y-2 pt-4 border-t border-white/10">
+                                <div className="space-y-2 pt-4 border-t border-foreground/10">
                                     <Label htmlFor="ml-model">ML Model</Label>
                                     <select
                                         id="ml-model"
@@ -790,7 +790,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         title="ML Model"
                                         value={selectedModel}
                                         onChange={(e) => setSelectedModel(e.target.value)}
-                                        className="w-full h-10 px-3 rounded-lg bg-background border border-white/10 text-foreground"
+                                        className="w-full h-10 px-3 rounded-lg bg-background border border-foreground/10 text-foreground"
                                     >
                                         {MODEL_OPTIONS.map(option => (
                                             <option key={option.value} value={option.value}>
@@ -860,7 +860,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                         </Card>
 
                         {/* History */}
-                        <Card className="glass-card border-white/10 backdrop-blur-xl mt-4">
+                        <Card className="glass-card border-foreground/10 backdrop-blur-xl mt-4">
                             <CardHeader
                                 className="cursor-pointer"
                                 onClick={() => setShowHistory(!showHistory)}
@@ -879,7 +879,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         <p className="text-sm text-muted-foreground text-center py-4">No advanced predictions yet</p>
                                     ) : (
                                         history.map(item => (
-                                            <div key={item.id} className="p-3 rounded-lg bg-white/5 flex justify-between items-center">
+                                            <div key={item.id} className="p-3 rounded-lg bg-foreground/5 flex justify-between items-center">
                                                 <div>
                                                     <p className="font-medium">{item.predicted_calories} kcal</p>
                                                     <p className="text-xs text-muted-foreground">
@@ -906,7 +906,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                         className="lg:col-span-2 space-y-4"
                     >
                         {(isLoading || isEvaluatingWithSarvam) ? (
-                            <Card className="glass-card border-white/10 backdrop-blur-xl h-full flex items-center justify-center min-h-[400px]">
+                            <Card className="glass-card border-foreground/10 backdrop-blur-xl h-full flex items-center justify-center min-h-[400px]">
                                 <CardContent className="text-center py-16">
                                     {/* Violet Circular Loading Bar */}
                                     <div className="flex flex-col items-center gap-6">
@@ -962,7 +962,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                         ) : prediction ? (
                             <>
                                 {/* Main Prediction Card */}
-                                <Card className="glass-card border-white/10 backdrop-blur-xl overflow-hidden">
+                                <Card className="glass-card border-foreground/10 backdrop-blur-xl overflow-hidden">
                                     <div className="absolute inset-0 bg-gradient-to-br from-pink-500/20 to-amber-500/20 opacity-50" />
                                     <CardContent className="relative p-8 text-center">
                                         <h2 className="text-lg text-muted-foreground mb-2">Predicted Calories Burned</h2>
@@ -971,11 +971,11 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         </div>
                                         <p className="text-xl text-muted-foreground mb-4">kcal</p>
                                         <div className="flex items-center justify-center gap-4 flex-wrap">
-                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10">
+                                            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/10">
                                                 <CheckCircle2 className="w-4 h-4 text-green-500" />
                                                 <span>Confidence: {(prediction.confidence_score * 100).toFixed(1)}%</span>
                                             </div>
-                                            <div className="px-4 py-2 rounded-full bg-white/10">
+                                            <div className="px-4 py-2 rounded-full bg-foreground/10">
                                                 Model: {prediction.model_type}
                                             </div>
                                             <div className="px-4 py-2 rounded-full bg-pink-500/20 text-pink-300">
@@ -986,7 +986,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-center">
                                             <Button
                                                 variant="outline"
-                                                className="hover:text-black"
+                                                className="hover:text-foreground"
                                                 onClick={() => navigate('/insights')}
                                             >
                                                 View AI Insights
@@ -1004,7 +1004,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                 {/* Metrics Grid */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                                     {/* BMI Card */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <Scale className="w-4 h-4 text-blue-500" />
@@ -1026,7 +1026,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                     </Card>
 
                                     {/* Heart Rate Zone */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <Heart className="w-4 h-4 text-red-500" />
@@ -1043,7 +1043,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                     </Card>
 
                                     {/* Intensity Level */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <Zap className="w-4 h-4 text-yellow-500" />
@@ -1063,7 +1063,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                     </Card>
 
                                     {/* Performance */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <TrendingUp className="w-4 h-4 text-green-500" />
@@ -1078,7 +1078,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                     </Card>
 
                                     {/* Recovery & Hydration */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <Shield className="w-4 h-4 text-cyan-500" />
@@ -1099,7 +1099,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                     </Card>
 
                                     {/* Fitness Assessment */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <Target className="w-4 h-4 text-purple-500" />
@@ -1125,7 +1125,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                     </Card>
 
                                     {/* Demographics */}
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                         <CardHeader className="pb-2">
                                             <CardTitle className="text-sm flex items-center gap-2">
                                                 <User className="w-4 h-4 text-cyan-500" />
@@ -1151,7 +1151,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                         transition={{ delay: 0.3 }}
                                         className="mt-6"
                                     >
-                                        <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                        <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                             <CardHeader>
                                                 <CardTitle className="flex items-center gap-2">
                                                     <BarChart2 className="w-5 h-5 text-pink-500" />
@@ -1216,7 +1216,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                 {/* Model Comparison Charts */}
                                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                                                     {/* R² Score */}
-                                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                                    <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                                         <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                                             <Award className="w-4 h-4 text-green-500" />
                                                             R² Score by Model
@@ -1239,7 +1239,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                     </div>
 
                                                     {/* Accuracy */}
-                                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                                    <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                                         <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                                             <Crosshair className="w-4 h-4 text-purple-500" />
                                                             Accuracy by Model (%)
@@ -1262,7 +1262,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                     </div>
 
                                                     {/* Precision */}
-                                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                                    <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                                         <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                                             <TrendingUp className="w-4 h-4 text-orange-500" />
                                                             Precision by Model (%)
@@ -1285,7 +1285,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                     </div>
 
                                                     {/* MAE */}
-                                                    <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                                                    <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                                         <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                                             <Target className="w-4 h-4 text-blue-500" />
                                                             Mean Absolute Error (calories)
@@ -1312,7 +1312,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                 <div className="overflow-x-auto">
                                                     <table className="w-full text-sm">
                                                         <thead>
-                                                            <tr className="border-b border-white/10">
+                                                            <tr className="border-b border-foreground/10">
                                                                 <th className="text-left p-3 text-muted-foreground">Model</th>
                                                                 <th className="text-center p-3 text-muted-foreground">R² Score</th>
                                                                 <th className="text-center p-3 text-muted-foreground">MAE</th>
@@ -1325,7 +1325,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                                                             {modelComparison.models.map((model, idx) => (
                                                                 <tr
                                                                     key={model.id}
-                                                                    className={`border-b border-white/5 ${idx === 0 ? 'bg-green-500/10' : ''}`}
+                                                                    className={`border-b border-foreground/5 ${idx === 0 ? 'bg-green-500/10' : ''}`}
                                                                 >
                                                                     <td className="p-3 font-medium">{model.name}</td>
                                                                     <td className="text-center p-3 text-green-400">{model.r2_score.toFixed(4)}</td>
@@ -1345,7 +1345,7 @@ export default function AdvancedCaloriePrediction(): JSX.Element {
                             </>
                         ) : (
                             /* Empty State */
-                            <Card className="glass-card border-white/10 backdrop-blur-xl h-full flex items-center justify-center min-h-[400px]">
+                            <Card className="glass-card border-foreground/10 backdrop-blur-xl h-full flex items-center justify-center min-h-[400px]">
                                 <CardContent className="text-center py-16">
                                     <div className="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500/20 to-amber-500/20 flex items-center justify-center mx-auto mb-6">
                                         <Dumbbell className="w-10 h-10 text-pink-500" />

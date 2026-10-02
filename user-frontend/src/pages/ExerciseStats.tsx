@@ -581,7 +581,7 @@ export default function ExerciseStats(): JSX.Element {
                 </div>
                 <Button
                     variant="outline"
-                    className="gap-2 border-white/20 hover:bg-transparent hover:border-white/60 transition-colors"
+                    className="gap-2 border-foreground/20 hover:bg-transparent hover:border-white/60 transition-colors"
                     onClick={handleExportPDF}
                 >
                     <Download className="w-4 h-4" />
@@ -676,7 +676,7 @@ export default function ExerciseStats(): JSX.Element {
                                             >
                                                 {/* Collapsed Header - Clickable */}
                                                 <div
-                                                    className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
+                                                    className="p-4 cursor-pointer hover:bg-foreground/5 transition-colors"
                                                     onClick={() => setExpandedSessionId(isExpanded ? null : session.id)}
                                                 >
                                                     <div className="flex items-center justify-between">
@@ -796,7 +796,7 @@ export default function ExerciseStats(): JSX.Element {
                                                             transition={{ duration: 0.3, ease: 'easeInOut' }}
                                                             className="overflow-hidden"
                                                         >
-                                                            <div className="border-t border-white/10 p-4 space-y-5">
+                                                            <div className="border-t border-foreground/10 p-4 space-y-5">
                                                                 {/* Session Overview */}
                                                                 <div>
                                                                     <h4 className="text-sm font-medium text-muted-foreground mb-3">Session Overview</h4>
@@ -850,7 +850,7 @@ export default function ExerciseStats(): JSX.Element {
                                                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                                         {/* Squats */}
                                                                         {session.squat_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center">
@@ -869,7 +869,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Pushups */}
                                                                         {session.pushup_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
@@ -888,7 +888,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Lunges */}
                                                                         {session.lunge_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
@@ -907,7 +907,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Jumping Jacks */}
                                                                         {session.jumping_jack_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-yellow-500/20 flex items-center justify-center">
@@ -926,7 +926,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* High Knees */}
                                                                         {session.high_knee_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
@@ -945,7 +945,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Burpees */}
                                                                         {session.burpee_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
@@ -964,7 +964,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Plank */}
                                                                         {session.plank_seconds > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
@@ -985,7 +985,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Sit-ups */}
                                                                         {session.situp_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-indigo-500/20 flex items-center justify-center">
@@ -1004,7 +1004,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Leg Raises */}
                                                                         {session.leg_raise_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-pink-500/20 flex items-center justify-center">
@@ -1023,7 +1023,7 @@ export default function ExerciseStats(): JSX.Element {
 
                                                                         {/* Bicycle Crunches */}
                                                                         {session.bicycle_crunch_reps > 0 && (
-                                                                            <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                                                                            <div className="p-4 rounded-lg bg-foreground/5 border border-foreground/10">
                                                                                 <div className="flex items-center justify-between mb-3">
                                                                                     <div className="flex items-center gap-2">
                                                                                         <div className="w-8 h-8 rounded-lg bg-rose-500/20 flex items-center justify-center">
@@ -1046,71 +1046,71 @@ export default function ExerciseStats(): JSX.Element {
                                                                 <div>
                                                                     <h4 className="text-sm font-medium text-muted-foreground mb-3">Performance Metrics</h4>
                                                                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                                                                        <div className="p-3 rounded-lg bg-white/5">
+                                                                        <div className="p-3 rounded-lg bg-foreground/5">
                                                                             <p className="text-xs text-muted-foreground">Calories/min</p>
                                                                             <p className="text-lg font-bold text-primary">{caloriesPerMinute}</p>
                                                                         </div>
-                                                                        <div className="p-3 rounded-lg bg-white/5">
+                                                                        <div className="p-3 rounded-lg bg-foreground/5">
                                                                             <p className="text-xs text-muted-foreground">Reps/min</p>
                                                                             <p className="text-lg font-bold">{repsPerMinute}</p>
                                                                         </div>
                                                                         {session.squat_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Squat Cal</p>
                                                                                 <p className="text-lg font-bold text-green-400">{session.squat_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.pushup_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Pushup Cal</p>
                                                                                 <p className="text-lg font-bold text-blue-400">{session.pushup_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.lunge_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Lunge Cal</p>
                                                                                 <p className="text-lg font-bold text-purple-400">{session.lunge_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.jumping_jack_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">JJ Cal</p>
                                                                                 <p className="text-lg font-bold text-yellow-400">{session.jumping_jack_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.high_knee_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">High Knee Cal</p>
                                                                                 <p className="text-lg font-bold text-orange-400">{session.high_knee_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.burpee_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Burpee Cal</p>
                                                                                 <p className="text-lg font-bold text-red-400">{session.burpee_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.plank_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Plank Cal</p>
                                                                                 <p className="text-lg font-bold text-cyan-400">{session.plank_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
 
                                                                         {session.situp_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Situp Cal</p>
                                                                                 <p className="text-lg font-bold text-indigo-400">{session.situp_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.leg_raise_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">Leg Raise Cal</p>
                                                                                 <p className="text-lg font-bold text-pink-400">{session.leg_raise_calories.toFixed(1)}</p>
                                                                             </div>
                                                                         )}
                                                                         {session.bicycle_crunch_calories > 0 && (
-                                                                            <div className="p-3 rounded-lg bg-white/5">
+                                                                            <div className="p-3 rounded-lg bg-foreground/5">
                                                                                 <p className="text-xs text-muted-foreground">BC Cal</p>
                                                                                 <p className="text-lg font-bold text-rose-400">{session.bicycle_crunch_calories.toFixed(1)}</p>
                                                                             </div>
@@ -1119,8 +1119,8 @@ export default function ExerciseStats(): JSX.Element {
                                                                 </div>
 
                                                                 {/* Session Info Footer */}
-                                                                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-white/10">
-                                                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-sm">
+                                                                <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-foreground/10">
+                                                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10 text-sm">
                                                                         <Calendar className="w-4 h-4" />
                                                                         {new Date(session.session_date).toLocaleDateString('en-US', {
                                                                             weekday: 'long',
@@ -1129,7 +1129,7 @@ export default function ExerciseStats(): JSX.Element {
                                                                             day: 'numeric'
                                                                         })}
                                                                     </div>
-                                                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-sm">
+                                                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10 text-sm">
                                                                         <Clock className="w-4 h-4" />
                                                                         {new Date(session.session_date).toLocaleTimeString('en-US', {
                                                                             hour: '2-digit',
@@ -1145,7 +1145,7 @@ export default function ExerciseStats(): JSX.Element {
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
-                                                                        className="ml-auto gap-2 border-white/20 hover:bg-transparent hover:border-white/60 transition-colors"
+                                                                        className="ml-auto gap-2 border-foreground/20 hover:bg-transparent hover:border-white/60 transition-colors"
                                                                         onClick={(e) => {
                                                                             e.stopPropagation()
                                                                             generateSingleSessionPDF(session)
@@ -1191,14 +1191,14 @@ export default function ExerciseStats(): JSX.Element {
                                         <Calendar className="w-4 h-4 text-white" />
                                         Start Date
                                     </Label>
-                                    <Input id="date1" type="date" value={date1} onChange={(e) => setDate1(e.target.value)} className="bg-white/5 dark-date-picker" />
+                                    <Input id="date1" type="date" value={date1} onChange={(e) => setDate1(e.target.value)} className="bg-foreground/5 dark-date-picker" />
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="date2" className="flex items-center gap-2">
                                         <Calendar className="w-4 h-4 text-white" />
                                         End Date
                                     </Label>
-                                    <Input id="date2" type="date" value={date2} onChange={(e) => setDate2(e.target.value)} className="bg-white/5 dark-date-picker" />
+                                    <Input id="date2" type="date" value={date2} onChange={(e) => setDate2(e.target.value)} className="bg-foreground/5 dark-date-picker" />
                                 </div>
                                 <Button onClick={handleCompare} disabled={comparing || !date1 || !date2} className="gap-2">
                                     <GitCompare className="w-4 h-4" />
@@ -1343,7 +1343,7 @@ export default function ExerciseStats(): JSX.Element {
                             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
                             className="fixed inset-0 z-50 flex items-center justify-center p-4"
                         >
-                            <Card className="glass-card border-white/10 backdrop-blur-xl shadow-2xl w-full max-w-xl mx-auto">
+                            <Card className="glass-card border-foreground/10 backdrop-blur-xl shadow-2xl w-full max-w-xl mx-auto">
                                 <CardHeader className="relative pb-4">
                                     <Button
                                         variant="ghost"
@@ -1377,7 +1377,7 @@ export default function ExerciseStats(): JSX.Element {
                                                 type="date"
                                                 value={exportStartDate}
                                                 onChange={(e) => setExportStartDate(e.target.value)}
-                                                className="bg-white/5 dark-date-picker"
+                                                className="bg-foreground/5 dark-date-picker"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -1390,16 +1390,16 @@ export default function ExerciseStats(): JSX.Element {
                                                 type="date"
                                                 value={exportEndDate}
                                                 onChange={(e) => setExportEndDate(e.target.value)}
-                                                className="bg-white/5 dark-date-picker"
+                                                className="bg-foreground/5 dark-date-picker"
                                             />
                                         </div>
                                     </div>
 
                                     {/* Sessions Count Display */}
-                                    <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-white/10">
+                                    <div className="p-4 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-foreground/10">
                                         <div className="flex items-center justify-between">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center">
+                                                <div className="w-12 h-12 rounded-xl bg-foreground/10 flex items-center justify-center">
                                                     <Activity className="w-6 h-6 text-primary" />
                                                 </div>
                                                 <div>

@@ -529,12 +529,12 @@ export default function Insights(): JSX.Element {
                         setRefreshing(false)
                     }}
                     disabled={refreshing}
-                    className="gap-2 group hover:text-black w-full md:w-auto"
+                    className="gap-2 group hover:text-foreground w-full md:w-auto"
                 >
                     {refreshing ? (
                         <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
                     ) : (
-                        <RefreshCw className="w-4 h-4 group-hover:text-black" />
+                        <RefreshCw className="w-4 h-4 group-hover:text-foreground" />
                     )}
                     {refreshing ? 'Refreshing...' : 'Refresh'}
                 </Button>
@@ -580,7 +580,7 @@ export default function Insights(): JSX.Element {
                                     transition={{ delay: index * 0.05 }}
                                     className="space-y-4"
                                 >
-                                    <Card className="glass-card border-white/10 backdrop-blur-xl overflow-hidden">
+                                    <Card className="glass-card border-foreground/10 backdrop-blur-xl overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 opacity-50" />
                                         <CardContent className="relative p-6 sm:p-8 text-center">
                                             <h2 className="text-lg text-muted-foreground mb-2">Predicted Calories Burned</h2>
@@ -589,18 +589,18 @@ export default function Insights(): JSX.Element {
                                             </div>
                                             <p className="text-lg text-muted-foreground mb-4">kcal</p>
                                             <div className="flex flex-wrap items-center justify-center gap-3">
-                                                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10">
+                                                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-foreground/10">
                                                     <CheckCircle2 className="w-4 h-4 text-green-500" />
                                                     <span>Confidence: {((main.confidence_score || 0) * 100).toFixed(1)}%</span>
                                                 </div>
-                                                <div className="px-4 py-2 rounded-full bg-white/10">
+                                                <div className="px-4 py-2 rounded-full bg-foreground/10">
                                                     Model: {main.model_type}
                                                 </div>
-                                                <div className="px-4 py-2 rounded-full bg-white/10 text-sm">
+                                                <div className="px-4 py-2 rounded-full bg-foreground/10 text-sm">
                                                     Type: {(row.prediction_type || main.prediction_type || 'standard').toUpperCase()}
                                                 </div>
                                                 {displayDate && (
-                                                    <div className="px-4 py-2 rounded-full bg-white/10 text-sm text-muted-foreground">
+                                                    <div className="px-4 py-2 rounded-full bg-foreground/10 text-sm text-muted-foreground">
                                                         {new Date(displayDate).toLocaleString()}
                                                     </div>
                                                 )}
@@ -687,7 +687,7 @@ export default function Insights(): JSX.Element {
                                                     items={aiInsights.structured.smart_recommendation_engine}
                                                     accentClass="text-violet-400"
                                                 />
-                                                <Card className="glass-card border-white/10 backdrop-blur-xl h-full">
+                                                <Card className="glass-card border-foreground/10 backdrop-blur-xl h-full">
                                                     <CardHeader className="pb-3">
                                                         <CardTitle className="text-base flex items-center gap-2">
                                                             <Lightbulb className="w-4 h-4 text-primary" />

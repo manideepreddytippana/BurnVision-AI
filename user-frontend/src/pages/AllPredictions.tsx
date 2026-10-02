@@ -199,7 +199,7 @@ export default function AllPredictions(): JSX.Element {
                     </div>
                     <div className="flex items-center gap-2">
                         {/* Filter Tabs */}
-                        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
+                        <div className="flex items-center gap-1 bg-foreground/5 rounded-lg p-1">
                             <button
                                 onClick={() => setActiveTab('all')}
                                 className={`px-3 py-1.5 rounded-md text-sm transition-colors ${activeTab === 'all' ? 'bg-primary text-white' : 'text-muted-foreground hover:text-foreground'}`}
@@ -246,14 +246,14 @@ export default function AllPredictions(): JSX.Element {
                 {/* Predictions List */}
                 <div className="space-y-4">
                     {isLoading ? (
-                        <Card className="glass-card border-white/10 backdrop-blur-xl">
+                        <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                             <CardContent className="py-16 text-center">
                                 <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
                                 <p className="text-muted-foreground">Loading predictions...</p>
                             </CardContent>
                         </Card>
                     ) : predictions.length === 0 ? (
-                        <Card className="glass-card border-white/10 backdrop-blur-xl">
+                        <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                             <CardContent className="py-16 text-center">
                                 <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
                                     <History className="w-8 h-8 text-primary" />
@@ -280,10 +280,10 @@ export default function AllPredictions(): JSX.Element {
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.05 }}
                                     >
-                                        <Card className="glass-card border-white/10 backdrop-blur-xl overflow-hidden">
+                                        <Card className="glass-card border-foreground/10 backdrop-blur-xl overflow-hidden">
                                             {/* Collapsed Header */}
                                             <div
-                                                className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
+                                                className="p-4 cursor-pointer hover:bg-foreground/5 transition-colors"
                                                 onClick={() => toggleExpand(uniqueId)}
                                             >
                                                 <div className="flex items-center justify-between">
@@ -326,7 +326,7 @@ export default function AllPredictions(): JSX.Element {
                                                             {isAdvanced ? <Dumbbell className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
                                                             {isAdvanced ? 'Advanced' : 'Basic'}
                                                         </div>
-                                                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10">
+                                                        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10">
                                                             <ModelIcon className="w-4 h-4 text-primary" />
                                                             <span className="text-sm">{getModelInfo(prediction.model_type).label}</span>
                                                         </div>
@@ -354,47 +354,47 @@ export default function AllPredictions(): JSX.Element {
                                                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                                                         className="overflow-hidden"
                                                     >
-                                                        <div className="border-t border-white/10 p-4 space-y-6">
+                                                        <div className="border-t border-foreground/10 p-4 space-y-6">
                                                             {/* Input Parameters */}
                                                             <div>
                                                                 <h4 className="text-sm font-medium text-muted-foreground mb-3">Input Parameters</h4>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                             <User className="w-3 h-3" />
                                                                             Gender
                                                                         </div>
                                                                         <p className="font-medium capitalize">{prediction.gender}</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                             <User className="w-3 h-3" />
                                                                             Age
                                                                         </div>
                                                                         <p className="font-medium">{prediction.age} years</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                             <Scale className="w-3 h-3" />
                                                                             Height
                                                                         </div>
                                                                         <p className="font-medium">{prediction.height} {isAdvanced ? 'm' : 'cm'}</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                             <Scale className="w-3 h-3" />
                                                                             Weight
                                                                         </div>
                                                                         <p className="font-medium">{prediction.weight} kg</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                             <Timer className="w-3 h-3" />
                                                                             Duration
                                                                         </div>
                                                                         <p className="font-medium">{isAdvanced ? prediction.session_duration : prediction.duration} min</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                             <Heart className="w-3 h-3 text-red-500" />
                                                                             {isAdvanced ? 'Avg HR' : 'Heart Rate'}
@@ -402,7 +402,7 @@ export default function AllPredictions(): JSX.Element {
                                                                         <p className="font-medium">{isAdvanced ? prediction.avg_heart_rate : prediction.heart_rate} bpm</p>
                                                                     </div>
                                                                     {!isAdvanced && (
-                                                                        <div className="p-3 rounded-lg bg-white/5">
+                                                                        <div className="p-3 rounded-lg bg-foreground/5">
                                                                             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                                 <Scale className="w-3 h-3 text-orange-500" />
                                                                                 Body Temp
@@ -411,7 +411,7 @@ export default function AllPredictions(): JSX.Element {
                                                                         </div>
                                                                     )}
                                                                     {isAdvanced && prediction.resting_heart_rate && (
-                                                                        <div className="p-3 rounded-lg bg-white/5">
+                                                                        <div className="p-3 rounded-lg bg-foreground/5">
                                                                             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-1">
                                                                                 <Heart className="w-3 h-3 text-red-400" />
                                                                                 Rest HR
@@ -595,19 +595,19 @@ export default function AllPredictions(): JSX.Element {
                                                             <div>
                                                                 <h4 className="text-sm font-medium text-muted-foreground mb-3">Performance Metrics</h4>
                                                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <p className="text-xs text-muted-foreground">Calories/min</p>
                                                                         <p className="text-lg font-bold text-primary">{prediction.derived_metrics.calories_per_minute}</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <p className="text-xs text-muted-foreground">{isAdvanced ? 'Cal/hr' : 'HR/min'}</p>
                                                                         <p className="text-lg font-bold">{isAdvanced ? prediction.derived_metrics.calories_per_hour : prediction.derived_metrics.hr_per_minute}</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <p className="text-xs text-muted-foreground">Workout Load</p>
                                                                         <p className="text-lg font-bold">{prediction.derived_metrics.workout_load}</p>
                                                                     </div>
-                                                                    <div className="p-3 rounded-lg bg-white/5">
+                                                                    <div className="p-3 rounded-lg bg-foreground/5">
                                                                         <p className="text-xs text-muted-foreground">Max HR</p>
                                                                         <p className="text-lg font-bold">{prediction.derived_metrics.max_heart_rate} bpm</p>
                                                                     </div>
@@ -615,12 +615,12 @@ export default function AllPredictions(): JSX.Element {
                                                             </div>
 
                                                             {/* Model Info */}
-                                                            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-white/10">
-                                                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-sm">
+                                                            <div className="flex flex-wrap items-center gap-3 pt-2 border-t border-foreground/10">
+                                                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10 text-sm">
                                                                     <ModelIcon className="w-4 h-4" />
                                                                     {getModelInfo(prediction.model_type).label}
                                                                 </div>
-                                                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-sm">
+                                                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-foreground/10 text-sm">
                                                                     <Target className="w-4 h-4" />
                                                                     Train Split: {(prediction.train_split * 100).toFixed(0)}%
                                                                 </div>

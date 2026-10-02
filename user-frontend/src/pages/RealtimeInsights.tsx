@@ -116,12 +116,12 @@ export default function RealtimeInsights(): JSX.Element {
                         setRefreshing(false)
                     }}
                     disabled={refreshing}
-                    className="gap-2 group hover:text-black w-full md:w-auto"
+                    className="gap-2 group hover:text-foreground w-full md:w-auto"
                 >
                     {refreshing ? (
                         <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                        <RefreshCw className="w-4 h-4 group-hover:text-black" />
+                        <RefreshCw className="w-4 h-4 group-hover:text-foreground" />
                     )}
                     {refreshing ? 'Refreshing...' : 'Refresh'}
                 </Button>
@@ -150,7 +150,7 @@ export default function RealtimeInsights(): JSX.Element {
                                 transition={{ delay: index * 0.04 }}
                                 className="space-y-4"
                             >
-                                <Card className="glass-card border-white/10 backdrop-blur-xl">
+                                <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                                     <CardHeader>
                                         <CardTitle className="flex flex-wrap items-center gap-2">
                                             <Flame className="w-5 h-5 text-orange-500" />

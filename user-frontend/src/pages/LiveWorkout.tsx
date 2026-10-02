@@ -1518,7 +1518,7 @@ const LiveWorkout = () => {
                                 size="sm"
                                 onClick={() => setWorkoutMode('auto')}
                                 disabled={isMonitoring}
-                                className={`text-xs h-8 ${workoutMode === 'auto' ? 'text-white hover:text-white' : 'hover:text-black'}`}
+                                className={`text-xs h-8 ${workoutMode === 'auto' ? 'text-white hover:text-white' : 'hover:text-foreground'}`}
                             >
                                 Auto-Detect All
                             </Button>
@@ -1527,7 +1527,7 @@ const LiveWorkout = () => {
                                 size="sm"
                                 onClick={() => setWorkoutMode('select')}
                                 disabled={isMonitoring}
-                                className={`text-xs ${workoutMode === 'select' ? 'text-white hover:text-white' : 'hover:text-black'}`}
+                                className={`text-xs ${workoutMode === 'select' ? 'text-white hover:text-white' : 'hover:text-foreground'}`}
                             >
                                 Select Exercise
                             </Button>

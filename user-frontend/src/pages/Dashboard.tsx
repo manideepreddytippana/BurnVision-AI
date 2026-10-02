@@ -126,7 +126,9 @@ export default function Dashboard(): JSX.Element {
     return (
         <div className="space-y-6">
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-                <h1 className="text-3xl font-bold">Welcome back, {user?.name || 'User'}!</h1>
+                <h1 className="text-3xl font-bold tracking-tight text-[#0a2540] dark:text-white font-heading">
+                    Welcome back, {user?.name || 'User'}!
+                </h1>
                 <p className="text-muted-foreground">Here's your fitness overview from your workout sessions.</p>
             </motion.div>
 

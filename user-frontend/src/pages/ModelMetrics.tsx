@@ -99,7 +99,7 @@ export default function ModelMetrics(): JSX.Element {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
             >
-                <Card className="glass-card border-white/10 backdrop-blur-xl">
+                <Card className="glass-card border-foreground/10 backdrop-blur-xl">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <BarChart2 className="w-5 h-5 text-primary" />
@@ -160,7 +160,7 @@ export default function ModelMetrics(): JSX.Element {
                         {/* Model Comparison Charts */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* R² Score Comparison */}
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                 <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                     <Award className="w-4 h-4 text-green-500" />
                                     R² Score by Model
@@ -206,7 +206,7 @@ export default function ModelMetrics(): JSX.Element {
                             </div>
 
                             {/* Accuracy Comparison */}
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                 <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                     <Crosshair className="w-4 h-4 text-purple-500" />
                                     Accuracy by Model (%)
@@ -252,7 +252,7 @@ export default function ModelMetrics(): JSX.Element {
                             </div>
 
                             {/* Precision Comparison */}
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                 <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                     <TrendingUp className="w-4 h-4 text-orange-500" />
                                     Precision by Model (%)
@@ -298,7 +298,7 @@ export default function ModelMetrics(): JSX.Element {
                             </div>
 
                             {/* MAE Comparison */}
-                            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+                            <div className="p-4 rounded-xl bg-foreground/5 border border-foreground/10">
                                 <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
                                     <Target className="w-4 h-4 text-blue-500" />
                                     Mean Absolute Error (calories)
@@ -344,10 +344,10 @@ export default function ModelMetrics(): JSX.Element {
                         </div>
 
                         {/* Model Details Table */}
-                        <div className="overflow-x-auto rounded-xl border border-white/10 bg-white/5 mt-8">
+                        <div className="overflow-x-auto rounded-xl border border-foreground/10 bg-foreground/5 mt-8">
                             <table className="w-full text-sm">
                                 <thead>
-                                    <tr className="border-b border-white/10 bg-white/5">
+                                    <tr className="border-b border-foreground/10 bg-foreground/5">
                                         <th className="text-left p-4 font-semibold text-muted-foreground">Model</th>
                                         <th className="text-center p-4 font-semibold text-muted-foreground">R² Score</th>
                                         <th className="text-center p-4 font-semibold text-muted-foreground">MAE</th>
@@ -360,7 +360,7 @@ export default function ModelMetrics(): JSX.Element {
                                     {modelComparison.models.map((model, idx) => (
                                         <tr
                                             key={model.id}
-                                            className={`border-b border-white/5 hover:bg-white/5 transition-colors ${idx === 0 ? 'bg-green-500/5' : ''}`}
+                                            className={`border-b border-foreground/5 hover:bg-foreground/5 transition-colors ${idx === 0 ? 'bg-green-500/5' : ''}`}
                                         >
                                             <td className="p-4 font-medium flex items-center gap-2">
                                                 {idx === 0 && <Award className="w-3 h-3 text-green-500" />}
