@@ -119,7 +119,7 @@ def export_pdf():
     
     c.setFont("Helvetica-Bold", 24)
     c.setFillColor(colors.HexColor('#8B5CF6'))
-    c.drawString(50, height - 50, "CalorieAI")
+    c.drawString(50, height - 50, "BurnVision AI")
     
     c.setFont("Helvetica-Bold", 18)
     c.setFillColor(colors.black)
